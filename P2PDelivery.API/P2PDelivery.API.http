@@ -1,0 +1,6 @@
+@P2PDelivery.API_HostAddress = http://localhost:5153
+
+GET {{P2PDelivery.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
