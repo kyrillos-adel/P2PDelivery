@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.API", "P2PDelivery.API\P2PDelivery.API.csproj", "{81CB03B1-5FA9-4DED-8783-A5F29CDD0C1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Application", "P2PDelivery.Application\P2PDelivery.Application.csproj", "{F199D447-21A3-4BC6-8F81-0C2192296D2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{81CB03B1-5FA9-4DED-8783-A5F29CDD0C1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81CB03B1-5FA9-4DED-8783-A5F29CDD0C1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81CB03B1-5FA9-4DED-8783-A5F29CDD0C1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F199D447-21A3-4BC6-8F81-0C2192296D2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F199D447-21A3-4BC6-8F81-0C2192296D2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F199D447-21A3-4BC6-8F81-0C2192296D2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F199D447-21A3-4BC6-8F81-0C2192296D2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
