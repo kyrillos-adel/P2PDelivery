@@ -14,15 +14,15 @@ public class AppDbContext : DbContext
     public DbSet<Match> Matches { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<User> Users { get; set; }
-    
-    //public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    //{
-    //}
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-        optionsBuilder.UseSqlServer("Server=.;Database=P2PDelivery;Trusted_Connection=True;Encrypt=false;TrustServerCertificate=True;");
     }
+
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    optionsBuilder.UseSqlServer("Server=.;Database=P2PDelivery;Trusted_Connection=True;Encrypt=false;TrustServerCertificate=True;");
+    //}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
