@@ -30,7 +30,7 @@ public class User : BaseEntity
     public ICollection<DeliveryRequest> DeliveryRequests { get; set; } = new List<DeliveryRequest>();
 
     [NotMapped]
-    public ICollection<Application> Applications { get; set; } = new List<Application>();
+    public ICollection<DRApplication> Applications { get; set; } = new List<DRApplication>();
 
     [NotMapped]
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();

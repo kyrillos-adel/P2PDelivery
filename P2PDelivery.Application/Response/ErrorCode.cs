@@ -1,4 +1,4 @@
-﻿namespace P2PDelivery.Applicationn.Response
+﻿namespace P2PDelivery.Application.Response
 {
     public enum ErrorCode
     {

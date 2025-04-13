@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\P2PDelivery.Application\P2PDelivery.Applicationn.csproj" />
+      <ProjectReference Include="..\P2PDelivery.Application\P2PDelivery.Application.csproj" />
       <ProjectReference Include="..\P2PDelivery.Domain\P2PDelivery.Domain.csproj" />
     </ItemGroup>
 

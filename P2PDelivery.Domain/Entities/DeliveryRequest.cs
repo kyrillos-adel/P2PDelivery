@@ -35,7 +35,7 @@ public class DeliveryRequest : BaseEntity
     /* Navigational properties */
     public ICollection<Item> Items { get; set; } = new List<Item>();
     
-    public ICollection<Application> Applications { get; set; } = new List<Application>();
+    public ICollection<DRApplication> Applications { get; set; } = new List<DRApplication>();
     
     public ICollection<DeliveryRequestUpdate> Updates { get; set; } = new List<DeliveryRequestUpdate>();
     

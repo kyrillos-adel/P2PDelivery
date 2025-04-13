@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35828.75 d17.13
+VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Domain", "P2PDelivery.Domain\P2PDelivery.Domain.csproj", "{A1505B92-6248-49BA-A4D7-00F7D5DD7C63}"
 EndProject
@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.API", "P2PDelivery.API\P2PDelivery.API.csproj", "{81CB03B1-5FA9-4DED-8783-A5F29CDD0C1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Applicationn", "P2PDelivery.Application\P2PDelivery.Applicationn.csproj", "{F199D447-21A3-4BC6-8F81-0C2192296D2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PDelivery.Application", "P2PDelivery.Application\P2PDelivery.Application.csproj", "{F199D447-21A3-4BC6-8F81-0C2192296D2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

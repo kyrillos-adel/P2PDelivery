@@ -5,7 +5,7 @@ namespace P2PDelivery.Infrastructure.Contexts;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<Application> Applications { get; set; }
+    public DbSet<DRApplication> Applications { get; set; }
     public DbSet<Chat> Chats { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<DeliveryRequest> DeliveryRequests { get; set; }
@@ -50,7 +50,7 @@ public class AppDbContext : DbContext
             .HasForeignKey(p => p.PayeeId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Application>()
+        modelBuilder.Entity<DRApplication>()
             .HasOne(a => a.User)
             .WithMany(u => u.Applications)
             .HasForeignKey(a => a.UserId)

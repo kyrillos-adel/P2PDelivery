@@ -3,7 +3,7 @@ using P2PDelivery.Domain.Enums;
 
 namespace P2PDelivery.Domain.Entities;
 
-public class Application : BaseEntity
+public class DRApplication : BaseEntity
 {
     public DateTime Date { get; set; }
     

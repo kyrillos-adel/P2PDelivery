@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using P2PDelivery.Applicationn.Interfaces;
+using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure.Contexts;
 

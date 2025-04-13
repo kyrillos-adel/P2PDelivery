@@ -8,7 +8,7 @@ public class Match : BaseEntity
     public DeliveryRequest? DeliveryRequest { get; set; }
     
     public int ApplicationId { get; set; } // Foreign key
-    public Application? Application { get; set; }
+    public DRApplication? Application { get; set; }
     
     [DataType(DataType.Currency)]
     public double Price { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using P2PDelivery.Domain.Entities;
 
-namespace P2PDelivery.Applicationn.Interfaces
+namespace P2PDelivery.Application.Interfaces
 {
     public interface IRepository<TEntity> where TEntity : BaseEntity
     {

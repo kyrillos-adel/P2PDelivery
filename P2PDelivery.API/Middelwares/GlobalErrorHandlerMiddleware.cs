@@ -1,5 +1,5 @@
 ﻿using Azure.Core;
-using P2PDelivery.Applicationn.Response;
+using P2PDelivery.Application.Response;
 
 namespace P2PDelivery.API.Middelwares
 {
@@ -31,7 +31,7 @@ namespace P2PDelivery.API.Middelwares
                 var message = ex.Message is null ? "An unexpected error occurred." : ex.Message;
 
                 var responseMsg = $"{requestId}: {message}";
-                var errorResponse = EndpointResponse<string>.Failure(ErrorCode.UnexpectedError, responseMsg);
+                var errorResponse = RequestResponse<string>.Failure(ErrorCode.UnexpectedError, responseMsg);
                 await context.Response.WriteAsJsonAsync(errorResponse);
             }
         }
