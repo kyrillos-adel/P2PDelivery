@@ -6,8 +6,7 @@ namespace P2PDelivery.Application.Interfaces
     public interface IRepository<TEntity> where TEntity : BaseEntity
     {
         // Retriving 
-        IQueryable<TEntity> GetAll();
-        IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> expression);
+        IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> expression=null);
         Task<TEntity> GetByIDAsync(int id);
 
         // Add
