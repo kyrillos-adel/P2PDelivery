@@ -12,9 +12,7 @@
 
     <ItemGroup>
       <Folder Include="DTOs\" />
-      <Folder Include="Interfaces\Services\" />
       <Folder Include="MappingProfiles\" />
-      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>
