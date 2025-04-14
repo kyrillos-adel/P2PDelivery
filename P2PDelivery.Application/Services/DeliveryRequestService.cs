@@ -28,7 +28,7 @@ namespace P2PDelivery.Application.Services
             
             mapper.Map(deliveryRequestDto, deliveryRequest);
 
-            await requestRepository.SaveChangesAsync();
+            requestRepository.SaveChangesAsync();
             
             return RequestResponse<DeliveryRequest>.Success(deliveryRequest, "Successfully updated delivery request");
         }
@@ -41,6 +41,8 @@ namespace P2PDelivery.Application.Services
                     "Delivery request not found");
             
             requestRepository.Delete(deliveryRequest);
+
+            requestRepository.SaveChangesAsync();
 
             return RequestResponse<DeliveryRequest>.Success(deliveryRequest, "Successfully deleted delivery request");
         }
