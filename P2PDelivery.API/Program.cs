@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using P2PDelivery.API.Middelwares;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
+using P2PDelivery.Application.MappingProfiles;
 using P2PDelivery.Application.Services;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
@@ -14,6 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Register AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -22,6 +26,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
 });
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

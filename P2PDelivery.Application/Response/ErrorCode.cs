@@ -16,6 +16,7 @@
 
 
         // DeliveryRequest Errors
+        DeliveryRequestNotExist = 300,
 
 
         // Application Errors
