@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Domain.Entities;
 
 namespace P2PDelivery.Infrastructure.Contexts;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User, IdentityRole<int>,int>
 {
     public DbSet<DRApplication> Applications { get; set; }
     public DbSet<Chat> Chats { get; set; }
@@ -13,7 +15,6 @@ public class AppDbContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<Match> Matches { get; set; }
     public DbSet<Payment> Payments { get; set; }
-    public DbSet<User> Users { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -26,6 +27,7 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Chat>()
             .HasOne(c => c.UserA)
             .WithMany(u => u.Chats)
