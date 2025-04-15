@@ -43,8 +43,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 JwtSettings.Initialize(builder.Configuration);
 
 var key = Encoding.UTF8.GetBytes(JwtSettings.SecretKey);
