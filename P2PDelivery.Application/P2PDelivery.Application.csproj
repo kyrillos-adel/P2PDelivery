@@ -11,8 +11,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="DTOs\" />
       <Folder Include="MappingProfiles\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.4" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     </ItemGroup>
 
 </Project>

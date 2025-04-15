@@ -13,6 +13,8 @@
 
         // User
         UserNotExist = 200,
+        IdentityError = 201,
+        ValidationError = 202,
 
 
         // DeliveryRequest Errors
