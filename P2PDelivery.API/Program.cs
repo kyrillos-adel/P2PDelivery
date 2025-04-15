@@ -1,4 +1,6 @@
 using System.Text;
+using AutoMapper;
+using P2PDelivery.API.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +11,7 @@ using P2PDelivery.Application.Services;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
+using P2PDelivery.Application.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
