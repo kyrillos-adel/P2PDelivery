@@ -19,14 +19,14 @@ namespace P2PDelivery.Application.Services
             this.mapper = mapper;
         }
         
-        public async Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestDto deliveryRequestDto)
+        public async Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {
             var deliveryRequest = await requestRepository.GetByIDAsync(id);
             if (deliveryRequest == null)
                 return RequestResponse<DeliveryRequest>.Failure(ErrorCode.DeliveryRequestNotExist,
                     "Delivery request not found");
             
-            mapper.Map(deliveryRequestDto, deliveryRequest);
+            mapper.Map(deliveryRequestUpdateDto, deliveryRequest);
 
             requestRepository.SaveChangesAsync();
             

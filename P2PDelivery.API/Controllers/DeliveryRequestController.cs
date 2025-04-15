@@ -17,9 +17,9 @@ namespace P2PDelivery.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] DeliveryRequestDto deliveryRequestDto)
+        public async Task<IActionResult> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {
-            var deliveryRequest = await deliveryRequestService.UpdateAsync(id, deliveryRequestDto);
+            var deliveryRequest = await deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
             if (deliveryRequest.ErrorCode == ErrorCode.DeliveryRequestNotExist)
                 return NotFound();
             

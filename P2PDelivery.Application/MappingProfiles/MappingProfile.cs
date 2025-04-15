@@ -8,7 +8,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<DeliveryRequest, DeliveryRequestDto>()
+        CreateMap<DeliveryRequest, DeliveryRequestUpdateDto>()
             .ForMember(dest => dest.TotalWeight, opt => opt.MapFrom(src => src.Items.Sum(i => i.Weight)))
             .ReverseMap();;
     }
