@@ -22,6 +22,8 @@
         UnknownError = 207,
         DeleteFailed = 208,
         UserDeleted = 209,
+        LoginFailed = 210,
+        InvalidPassword = 211,
 
 
         // DeliveryRequest Errors

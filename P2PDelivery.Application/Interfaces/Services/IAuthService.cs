@@ -7,6 +7,6 @@ namespace P2PDelivery.Application.Interfaces.Services
     {
         Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto);
         Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO);
-        Task<RequestResponse<string>> DeleteUserByIdAsync(string UserName);
+        Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName);
     }
 }

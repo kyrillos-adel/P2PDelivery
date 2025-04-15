@@ -1,3 +1,4 @@
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,21 +20,23 @@ namespace P2PDelivery.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        public async Task<RequestResponse<LoginResponseDTO>> Login([FromBody] LoginDTO loginDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.ValidationError, "Invalid data provided.");
+
             var response = await _authService.LoginAsync(loginDto);
+
             if (response.IsSuccess)
             {
-                return Ok(response.Data);
+                return RequestResponse<LoginResponseDTO>.Success(response.Data, "User logged in successfully.");
             }
             else
             {
-                return BadRequest(response.Message);
+                return RequestResponse<LoginResponseDTO>.Failure(response.ErrorCode, response.Message);
             }
-
         }
+
         [HttpPost("Register")]
         public async Task<RequestResponse<RegisterDTO>> Register(RegisterDTO registerDTO)
         {
@@ -71,7 +74,7 @@ namespace P2PDelivery.API.Controllers
             if (string.IsNullOrEmpty(userName))
                 return Unauthorized("User not authenticated.");
 
-            var result = await _authService.DeleteUserByIdAsync(userName);
+            var result = await _authService.DeleteUserNameIdAsync(userName);
 
             if (result.IsSuccess)
                 return Ok(result.Message);

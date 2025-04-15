@@ -87,7 +87,7 @@ namespace P2PDelivery.Application.Services
         }
 
 
-        public async Task<RequestResponse<string>> DeleteUserByIdAsync(string UserName)
+        public async Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
             if (user == null)
