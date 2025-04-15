@@ -9,7 +9,7 @@ public class User : IdentityUser<int>
     [StringLength(50)]
     public string FullName { get; set; }
     
-    [RegularExpression(@"^2|3\d{1}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{2}\d{5}$")]
+    public string Address { get; set; }
     public string NatId { get; set; }
     
     public bool NatIdVerification { get; set; }
