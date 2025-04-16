@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+
+using Microsoft.AspNetCore.Identity;﻿
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
+using System.Text;
 using System.ComponentModel.DataAnnotations;
 
 namespace P2PDelivery.Application.Services
@@ -18,14 +20,18 @@ namespace P2PDelivery.Application.Services
             _jwtTokenGenerator = jwtTokenGenerator;
             _roleManager = roleManager;
         }
+
+        
+
         public async Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO )
         {
+            
             IdentityResult result = null;
             var usersinded = _userManager.FindByNameAsync(registerDTO.UserName);
             if (usersinded.Result == null)
             {
-                var user = new User
-                {
+                  var user = new User
+                 {
                     UserName = registerDTO.UserName,
                     FullName = registerDTO.FullName,
                     Email = registerDTO.Email,
@@ -33,7 +39,9 @@ namespace P2PDelivery.Application.Services
                     NatId = registerDTO.NatId,
                     PhoneNumber = registerDTO.Phone,
                     CreatedAt = DateTime.Now
-                };
+                 };
+               
+
                 result = await _userManager.CreateAsync(user, registerDTO.Password);
                 if (result.Succeeded)
                 {
@@ -41,17 +49,32 @@ namespace P2PDelivery.Application.Services
                 }
                 else  
                 { var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
-                    return RequestResponse<RegisterDTO>.Failure(ErrorCode.IdentityError, errorMessage);
+                    return RequestResponse<RegisterDTO>.Failure(ErrorCode.UnexpectedError, errorMessage);
                 }
             }
             else
             {
-                return RequestResponse<RegisterDTO>.Failure(ErrorCode.EmailExist, "user is exist");
+                return RequestResponse<RegisterDTO>.Failure(ErrorCode.Userexist, "user is exist");
 
 
             }
         }
 
+        
+
+        public async Task<RequestResponse<string>> GetByName(string username)
+        {
+            var founded = await _userManager.FindByNameAsync(username);
+            if (founded == null)
+                return RequestResponse<string>.Failure(ErrorCode.Userexist, "user not exist: ");
+           
+            else
+            {
+
+                return RequestResponse<string>.Success(founded.FullName ," exist.");
+            }
+
+        }
         
         public async Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto)
         {

@@ -15,6 +15,18 @@ using P2PDelivery.Infrastructure.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("OpenCorsPolicy", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -137,6 +149,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 924c1a5d621383ed88e80f80b1cb55f8ff474fe9
 app.UseAuthentication();
 app.UseAuthorization();
 
