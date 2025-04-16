@@ -49,5 +49,7 @@ namespace P2PDelivery.Application.DTOs
         public string ConfirmPassword { get; set; }
 
 
+
+
     }
 }

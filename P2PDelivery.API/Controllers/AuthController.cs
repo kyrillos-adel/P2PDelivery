@@ -25,20 +25,19 @@ namespace P2PDelivery.API.Controllers
         [HttpPost("Register")]
         public async Task<RequestResponse<RegisterDTO>> Register(RegisterDTO registerDTO)
         {
-            if (!ModelState.IsValid)
-            {
-                string modelErrors = string.Join("; ", ModelState.Values
-                                            .SelectMany(v => v.Errors)
-                                            .Select(e => e.ErrorMessage));
 
-                return RequestResponse<RegisterDTO>.Failure(ErrorCode.ValidationError, modelErrors);
-            }
-
-            var response = await _authService.RegisterAsync(registerDTO);
-            return response;
+            return await _authService.RegisterAsync(registerDTO);
         }
-
-
+        [HttpGet("DeleteAccount")]
+        public async Task<RequestResponse<string>> Delete(RegisterDTO registerDTO)
+        {
+          return await _authService.DeleteAccount(registerDTO.UserName);     
+        }
+        [HttpGet("findbyname")]
+        public async Task<RequestResponse<string>> FindByName(string Name)
+        {
+            return await _authService.GetByName(Name);
+        }
 
     }
 }
