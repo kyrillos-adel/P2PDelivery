@@ -15,9 +15,16 @@
         UserNotExist = 200,
         IdentityError = 201,
         ValidationError = 202,
-        Userexist = 203,
-
-
+        Userexist = 212,
+        UserNotFound = 203,
+        InvalidToken = 204,
+        UserAlreadyDeleted = 205,
+        Unauthorized = 206,
+        UnknownError = 207,
+        DeleteFailed = 208,
+        UserDeleted = 209,
+        LoginFailed = 210,
+        InvalidPassword = 211,
         // DeliveryRequest Errors
 
 

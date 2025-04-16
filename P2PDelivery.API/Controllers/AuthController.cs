@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNet.Identity;
+using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
-using P2PDelivery.Domain.Entities;
-using System.Threading.Tasks;
-using IdentityResult = Microsoft.AspNetCore.Identity.IdentityResult;
-
+using System.Security.Claims;
 namespace P2PDelivery.API.Controllers
 {
     [Route("api/[controller]")]
@@ -22,22 +19,57 @@ namespace P2PDelivery.API.Controllers
             _authService = authService;
         }
 
+        [HttpPost("login")]
+        public async Task<RequestResponse<LoginResponseDTO>> Login([FromBody] LoginDTO loginDto)
+        {
+            if (!ModelState.IsValid)
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.ValidationError, "Invalid data provided.");
+
+            var response = await _authService.LoginAsync(loginDto);
+
+            if (response.IsSuccess)
+            {
+                return RequestResponse<LoginResponseDTO>.Success(response.Data, "User logged in successfully.");
+            }
+            else
+            {
+                return RequestResponse<LoginResponseDTO>.Failure(response.ErrorCode, response.Message);
+            }
+        }
+
         [HttpPost("Register")]
         public async Task<RequestResponse<RegisterDTO>> Register(RegisterDTO registerDTO)
         {
 
             return await _authService.RegisterAsync(registerDTO);
         }
-        [HttpGet("DeleteAccount")]
-        public async Task<RequestResponse<string>> Delete(RegisterDTO registerDTO)
-        {
-          return await _authService.DeleteAccount(registerDTO.UserName);     
-        }
+
+
+        
+
+
         [HttpGet("findbyname")]
         public async Task<RequestResponse<string>> FindByName(string Name)
         {
             return await _authService.GetByName(Name);
+                
         }
 
+        [Authorize]
+        [HttpDelete("delete-account")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userName =  User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(userName))
+                return Unauthorized("User not authenticated.");
+
+            var result = await _authService.DeleteUserNameIdAsync(userName);
+
+            if (result.IsSuccess)
+                return Ok(result.Message);
+
+            return BadRequest(result.Message);
+        }
     }
 }

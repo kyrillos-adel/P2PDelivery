@@ -1,23 +1,24 @@
-﻿using Microsoft.AspNet.Identity.Owin;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json.Linq;
+
+using Microsoft.AspNetCore.Identity;﻿
 using P2PDelivery.Application.DTOs;
-using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.ComponentModel.DataAnnotations;
 
 namespace P2PDelivery.Application.Services
 {
     public class AuthService : IAuthService
     {
-        UserManager<User> _userManager;
-        public AuthService(UserManager<User> userManager)
+        private readonly UserManager<User> _userManager;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
+        public AuthService(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IJwtTokenGenerator jwtTokenGenerator)
         {
             _userManager = userManager;
+            _jwtTokenGenerator = jwtTokenGenerator;
+            _roleManager = roleManager;
         }
 
         
@@ -44,14 +45,12 @@ namespace P2PDelivery.Application.Services
                 result = await _userManager.CreateAsync(user, registerDTO.Password);
                 if (result.Succeeded)
                 {
-                   
                     return RequestResponse<RegisterDTO>.Success(registerDTO, "User registered successfully.");
                 }
                 else  
                 { var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
                     return RequestResponse<RegisterDTO>.Failure(ErrorCode.UnexpectedError, errorMessage);
                 }
-
             }
             else
             {
@@ -61,30 +60,7 @@ namespace P2PDelivery.Application.Services
             }
         }
 
-        public async Task<RequestResponse<string>> DeleteAccount(string UserName)
-        {
-            var user = await _userManager.FindByNameAsync(UserName);
-
-            if (user == null)
-            {
-                return RequestResponse<string>.Failure(ErrorCode.UserNotExist, "User does not exist.");
-            }
-
-            user.IsDeleted = true;
-            user.DeletedAt = DateTime.Now;
-
-            var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
-            {
-                return RequestResponse<string>.Success("User accoun deleted.");
-            }
-            else
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return RequestResponse<string>.Failure(ErrorCode.IdentityError, "Failed to delete user: " + errors);
-            }
-        }
+        
 
         public async Task<RequestResponse<string>> GetByName(string username)
         {
@@ -99,5 +75,57 @@ namespace P2PDelivery.Application.Services
             }
 
         }
+        
+        public async Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto)
+        {
+            bool isEmail = new EmailAddressAttribute().IsValid(loginDto.Identifier);
+            var user = isEmail
+                ? await _userManager.FindByEmailAsync(loginDto.Identifier)
+                : await _userManager.FindByNameAsync(loginDto.Identifier);
+
+            if (user == null)
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserNotFound, "User not found.");
+
+            if (user.IsDeleted)
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserDeleted, "Account has been deleted.");
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (!isPasswordValid)
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserNotFound, "Wrong password");
+            // Generate JWT token
+            var token = await _jwtTokenGenerator.GenerateToken(user);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var loginResponse = new LoginResponseDTO
+            {
+                Token = token,
+                Expiration = DateTime.Now.AddHours(1),
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = roles.ToList()
+            };
+
+            return RequestResponse<LoginResponseDTO>.Success(loginResponse, "Login successful.");
+        }
+
+
+        public async Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+            if (user == null)
+                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "User not found.");
+
+            user.IsDeleted = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+                return RequestResponse<string>.Success("User soft deleted successfully.");
+
+            return RequestResponse<string>.Failure(ErrorCode.DeleteFailed, "Failed to soft delete user.");
+        }
+
+
     }
+    
 }
