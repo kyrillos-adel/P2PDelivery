@@ -61,7 +61,7 @@ namespace P2PDelivery.Application.Services
                 : await _userManager.FindByNameAsync(loginDto.Identifier);
 
             if (user == null)
-                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserNotFound, "User not found.");
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserNotFound, "Wrong email or user-name");
 
             if (user.IsDeleted)
                 return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserDeleted, "Account has been deleted.");
@@ -69,7 +69,7 @@ namespace P2PDelivery.Application.Services
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
             if (!isPasswordValid)
-                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.UserNotFound, "Wrong password");
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.IncorrectPassword, "Wrong password");
             // Generate JWT token
             var token = await _jwtTokenGenerator.GenerateToken(user);
             var roles = await _userManager.GetRolesAsync(user);
