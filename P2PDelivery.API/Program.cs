@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using P2PDelivery.API.Middelwares;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
+using P2PDelivery.Application.MappingProfiles;
 using P2PDelivery.Application.Services;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
@@ -17,20 +18,61 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Register AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("AllowAll", cfg =>
+    {
+        cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+
+    opt.AddPolicy("SpecifcAllow", cfg =>
+    {
+        cfg.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 
 JwtSettings.Initialize(builder.Configuration);
@@ -58,6 +100,8 @@ builder.Services.AddAuthentication(opts =>
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
+
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -66,6 +110,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
