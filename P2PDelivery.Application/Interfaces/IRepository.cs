@@ -20,6 +20,8 @@ namespace P2PDelivery.Application.Interfaces
         //Delete
         void Delete(TEntity entity);
         void DeleteRange(IEnumerable<TEntity> entities);
+       
+
 
         // IsExist
         Task<bool> IsExistAsync(int id);
