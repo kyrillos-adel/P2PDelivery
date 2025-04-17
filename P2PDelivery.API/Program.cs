@@ -35,6 +35,19 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("AllowAll", cfg =>
+    {
+        cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+
+    opt.AddPolicy("SpecifcAllow", cfg =>
+    {
+        cfg.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -55,6 +68,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 
 JwtSettings.Initialize(builder.Configuration);
@@ -92,6 +106,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

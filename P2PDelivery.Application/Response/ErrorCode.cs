@@ -5,6 +5,7 @@
         None = 0,
         ServerError=1,
         UnexpectedError=2,
+        UnAuthorize=3,
 
         // Auth
         EmailExist = 101,
@@ -17,6 +18,7 @@
 
         // DeliveryRequest Errors
         DeliveryRequestNotExist = 300,
+        
 
 
         // Application Errors

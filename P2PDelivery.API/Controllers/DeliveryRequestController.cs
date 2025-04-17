@@ -1,5 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
+
 using P2PDelivery.Application.DTOs;
+
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 
@@ -16,6 +22,22 @@ namespace P2PDelivery.API.Controllers
             _deliveryRequestService = deliveryRequestService;
         }
 
+
+        [HttpGet("details/{deliveryID}")]
+        public async Task<ActionResult<DeliveryRequestDetailsDTO>> GetRequestDetails(int deliveryID)
+        {
+            //var userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userID = 4;
+
+            var response = await _deliveryRequestService.GetDeliveryRequestDetailsAsync(deliveryID,userID);
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return NotFound(response);
+        }
+
+
         [HttpPut("{id}")]
         public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {
@@ -25,6 +47,7 @@ namespace P2PDelivery.API.Controllers
             
             return Ok(requestResponse);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<RequestResponse<bool>>> Delete(int id)
