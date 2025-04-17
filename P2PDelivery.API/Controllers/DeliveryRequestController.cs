@@ -1,9 +1,13 @@
-﻿using System.Security.Claims;
+
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
+
+using P2PDelivery.Application.DTOs;
+
 using P2PDelivery.Application.Interfaces.Services;
+using P2PDelivery.Application.Response;
 
 namespace P2PDelivery.API.Controllers
 {
@@ -17,6 +21,7 @@ namespace P2PDelivery.API.Controllers
         {
             _deliveryRequestService = deliveryRequestService;
         }
+
 
         [HttpGet("details/{deliveryID}")]
         public async Task<ActionResult<DeliveryRequestDetailsDTO>> GetRequestDetails(int deliveryID)
@@ -33,6 +38,25 @@ namespace P2PDelivery.API.Controllers
         }
 
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
+        {
+            var requestResponse = await _deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
+            if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
+                return NotFound(requestResponse);
+            
+            return Ok(requestResponse);
+        }
 
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<RequestResponse<bool>>> Delete(int id)
+        {
+            var requestResponse = await _deliveryRequestService.DeleteAsync(id);
+            if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
+                return NotFound(requestResponse);
+
+            return Ok(requestResponse);
+        }
     }
 }

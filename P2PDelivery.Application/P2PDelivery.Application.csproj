@@ -11,7 +11,9 @@
     </ItemGroup>
 
     <ItemGroup>
+
       <Folder Include="MappingProfiles\" />
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     </ItemGroup>
 
 </Project>

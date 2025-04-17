@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using P2PDelivery.API.Middelwares;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
+using P2PDelivery.Application.MappingProfiles;
 using P2PDelivery.Application.Services;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
@@ -13,6 +14,21 @@ using P2PDelivery.Infrastructure.Contexts;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Register AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -35,6 +51,18 @@ builder.Services.AddCors(opt =>
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
 });
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -67,6 +95,8 @@ builder.Services.AddAuthentication(opts =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.
