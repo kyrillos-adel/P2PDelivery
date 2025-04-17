@@ -5,11 +5,13 @@ namespace P2PDelivery.Domain.Entities;
 
 public class User : IdentityUser<int>
 {
-    
-    [StringLength(50)]
+
+    [StringLength(20, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]
+    [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Full name must contain only letters and spaces.")]
     public string FullName { get; set; }
-    
+    [Required(ErrorMessage = "Address is required")]
     public string Address { get; set; }
+    [RegularExpression(@"^2|3\d{1}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{2}\d{5}$")]
     public string NatId { get; set; }
     
     public bool NatIdVerification { get; set; }
