@@ -1,10 +1,8 @@
-
 using Microsoft.AspNetCore.Identity;﻿
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 
 namespace P2PDelivery.Application.Services

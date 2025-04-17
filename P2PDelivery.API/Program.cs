@@ -1,6 +1,4 @@
 using System.Text;
-using AutoMapper;
-using P2PDelivery.API.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,38 +13,13 @@ using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
-using P2PDelivery.Application.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("OpenCorsPolicy", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-
-
-// Add services to the container.
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// Add CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -92,6 +65,7 @@ builder.Services.AddSwaggerGen(swagger =>
 
 builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
 
+// Add CORS policy
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", cfg =>
@@ -119,21 +93,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequiredLength = 8;  // Minimum length of the password
     options.Password.RequireNonAlphanumeric = true;  // Requires at least one non-alphanumeric character (e.g., !, @, #)
     options.User.RequireUniqueEmail = true;
-}
-)
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
-// Configure CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-});
+}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -177,6 +137,7 @@ var app = builder.Build();
 app.UseCors("AllowAll");
 
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -184,7 +145,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
-app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

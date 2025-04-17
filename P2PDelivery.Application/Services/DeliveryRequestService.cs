@@ -125,15 +125,8 @@ namespace P2PDelivery.Application.Services
                 return false;
             }
             return true;
-
-        private readonly IMapper _mapper;
-
-        public DeliveryRequestService(IRepository<DeliveryRequest> requestRepository,
-            IMapper mapper)
-        {
-            _requestRepository = requestRepository;
-            _mapper = mapper;
         }
+
         
         public async Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {

@@ -1,10 +1,8 @@
-
 using P2PDelivery.Domain.Entities;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
-using P2PDelivery.Application.Response;
-using P2PDelivery.Domain.Entities;
+
 
 namespace P2PDelivery.Application.Interfaces.Services
 {
