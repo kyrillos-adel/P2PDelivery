@@ -1,4 +1,6 @@
 using System.Text;
+using AutoMapper;
+using P2PDelivery.API.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +9,13 @@ using Microsoft.OpenApi.Models;
 using P2PDelivery.API.Middelwares;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
+using P2PDelivery.Application.MappingProfiles;
 using P2PDelivery.Application.Services;
 using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
+using P2PDelivery.Application.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,10 +33,24 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 
+// Register AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-//builder.Services.AddSwaggerGen();
 
 builder.Services.AddSwaggerGen(swagger =>
 {
@@ -40,8 +58,8 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "ASP.NET 5 Web API",
-        Description = "ITI Project"
+        Title = "P2P Delivery",
+        Description = "P2P Delivery - ITI Project"
     });
 
     // Enable JWT Bearer token authorization
@@ -72,11 +90,26 @@ builder.Services.AddSwaggerGen(swagger =>
 });
 
 
+builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("AllowAll", cfg =>
+    {
+        cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+
+    opt.AddPolicy("SpecifcAllow", cfg =>
+    {
+        cfg.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod();
+    });
+});
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
@@ -90,11 +123,26 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 )
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+
 JwtSettings.Initialize(builder.Configuration);
 
 var key = Encoding.UTF8.GetBytes(JwtSettings.SecretKey);
@@ -120,23 +168,13 @@ builder.Services.AddAuthentication(opts =>
         ValidateLifetime = true
 
     };
-}
-);
-builder.Services.AddAuthorization();
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("OpenCorsPolicy", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
 });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.
@@ -146,13 +184,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
-app.UseCors("OpenCorsPolicy");
-<<<<<<< HEAD
-=======
 
->>>>>>> 924c1a5d621383ed88e80f80b1cb55f8ff474fe9
 app.UseAuthentication();
 app.UseAuthorization();
 
