@@ -7,6 +7,6 @@ namespace P2PDelivery.Application.Interfaces.Services
     public interface IDeliveryRequestService
     {
         Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestUpdateDto deliveryRequestUpdateDtodto);
-        Task<RequestResponse<DeliveryRequest>> DeleteAsync(int id);
+        Task<RequestResponse<bool>> DeleteAsync(int id);
     }
 }

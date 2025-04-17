@@ -9,31 +9,31 @@ namespace P2PDelivery.API.Controllers
     [ApiController]
     public class DeliveryRequestController : ControllerBase
     {
-        private readonly IDeliveryRequestService deliveryRequestService;
+        private readonly IDeliveryRequestService _deliveryRequestService;
 
         public DeliveryRequestController(IDeliveryRequestService deliveryRequestService)
         {
-            this.deliveryRequestService = deliveryRequestService;
+            _deliveryRequestService = deliveryRequestService;
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
+        public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {
-            var deliveryRequest = await deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
-            if (deliveryRequest.ErrorCode == ErrorCode.DeliveryRequestNotExist)
-                return NotFound();
+            var requestResponse = await _deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
+            if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
+                return NotFound(requestResponse);
             
-            return Ok(deliveryRequest.Data);
+            return Ok(requestResponse);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<RequestResponse<bool>>> Delete(int id)
         {
-            var deliveryRequest = await deliveryRequestService.DeleteAsync(id);
-            if (deliveryRequest.ErrorCode == ErrorCode.DeliveryRequestNotExist)
-                return NotFound();
+            var requestResponse = await _deliveryRequestService.DeleteAsync(id);
+            if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
+                return NotFound(requestResponse);
 
-            return Ok(deliveryRequest.Data);
+            return Ok(requestResponse);
         }
     }
 }

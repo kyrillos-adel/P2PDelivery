@@ -18,6 +18,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -69,6 +81,8 @@ builder.Services.AddAuthentication(opts =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.

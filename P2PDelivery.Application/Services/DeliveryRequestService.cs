@@ -9,42 +9,42 @@ namespace P2PDelivery.Application.Services
 {
     public class DeliveryRequestService : IDeliveryRequestService
     {
-        private readonly IRepository<DeliveryRequest> requestRepository;
-        private readonly IMapper mapper;
+        private readonly IRepository<DeliveryRequest> _requestRepository;
+        private readonly IMapper _mapper;
 
         public DeliveryRequestService(IRepository<DeliveryRequest> requestRepository,
             IMapper mapper)
         {
-            this.requestRepository = requestRepository;
-            this.mapper = mapper;
+            _requestRepository = requestRepository;
+            _mapper = mapper;
         }
         
         public async Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestUpdateDto deliveryRequestUpdateDto)
         {
-            var deliveryRequest = await requestRepository.GetByIDAsync(id);
+            var deliveryRequest = await _requestRepository.GetByIDAsync(id);
             if (deliveryRequest == null)
                 return RequestResponse<DeliveryRequest>.Failure(ErrorCode.DeliveryRequestNotExist,
                     "Delivery request not found");
             
-            mapper.Map(deliveryRequestUpdateDto, deliveryRequest);
+            _mapper.Map(deliveryRequestUpdateDto, deliveryRequest);
 
-            requestRepository.SaveChangesAsync();
+            _requestRepository.SaveChangesAsync();
             
             return RequestResponse<DeliveryRequest>.Success(deliveryRequest, "Successfully updated delivery request");
         }
 
-        public async Task<RequestResponse<DeliveryRequest>> DeleteAsync(int id)
+        public async Task<RequestResponse<bool>> DeleteAsync(int id)
         {
-            var deliveryRequest = await requestRepository.GetByIDAsync(id);
+            var deliveryRequest = await _requestRepository.GetByIDAsync(id);
             if (deliveryRequest == null)
-                return RequestResponse<DeliveryRequest>.Failure(ErrorCode.DeliveryRequestNotExist,
+                return RequestResponse<bool>.Failure(ErrorCode.DeliveryRequestNotExist,
                     "Delivery request not found");
             
-            requestRepository.Delete(deliveryRequest);
+            _requestRepository.Delete(deliveryRequest);
 
-            requestRepository.SaveChangesAsync();
+            _requestRepository.SaveChangesAsync();
 
-            return RequestResponse<DeliveryRequest>.Success(deliveryRequest, "Successfully deleted delivery request");
+            return RequestResponse<bool>.Success(true, "Successfully deleted delivery request");
         }
     }
 }
