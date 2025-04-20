@@ -11,4 +11,5 @@ public interface IAuthService
     Task<RequestResponse<string>> GetByName(string username);
 
     Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName);
+    Task<RequestResponse<string>> EditUserInfo(string UserName, RegisterDTO registerDTO);
 }

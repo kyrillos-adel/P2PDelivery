@@ -26,9 +26,11 @@
         UserDeleted = 209,
         LoginFailed = 210,
         InvalidPassword = 211,
+        UpdateFailed = 212,
         // DeliveryRequest Errors
         DeliveryRequestNotExist = 300,
         
+
 
 
         // Application Errors

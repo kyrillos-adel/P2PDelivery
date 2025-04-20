@@ -65,5 +65,17 @@ namespace P2PDelivery.API.Controllers
 
             return BadRequest(respond);
         }
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
+        {
+            var UserName = User.FindFirstValue(ClaimTypes.Name);
+            var response = await _authService.EditUserInfo(UserName, registerDTO);
+
+            if (response.IsSuccess)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
     }
 }

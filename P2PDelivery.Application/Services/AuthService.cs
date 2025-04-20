@@ -57,21 +57,15 @@ namespace P2PDelivery.Application.Services
 
             }
         }
-
-        
-
         public async Task<RequestResponse<string>> GetByName(string username)
         {
             var founded = await _userManager.FindByNameAsync(username);
-            if (founded == null)
+           
+            if (founded == null || founded.IsDeleted == true)
                 return RequestResponse<string>.Failure(ErrorCode.Userexist, "user not exist: ");
            
             else
-            {
-
                 return RequestResponse<string>.Success(founded.FullName ," exist.");
-            }
-
         }
         
         public async Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto)
@@ -123,6 +117,47 @@ namespace P2PDelivery.Application.Services
             return RequestResponse<string>.Failure(ErrorCode.DeleteFailed, "Failed to soft delete user.");
         }
 
+
+        public async Task<RequestResponse<string>> EditUserInfo(string UserName, RegisterDTO registerDTO)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+
+            if (user == null || user.IsDeleted)
+                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not found");
+
+            // Optional checks for duplicate username/email
+            if (!string.IsNullOrWhiteSpace(registerDTO.Email) && registerDTO.Email != user.Email)
+            {
+                var emailExists = await _userManager.FindByEmailAsync(registerDTO.Email);
+                if (emailExists != null && emailExists.UserName != user.UserName)
+                    return RequestResponse<string>.Failure(ErrorCode.EmailExist, "Email is already taken.");
+
+                user.Email = registerDTO.Email;
+
+            }
+
+            if (!string.IsNullOrWhiteSpace(registerDTO.UserName) && registerDTO.UserName != user.UserName)
+            {
+                var userNameExists = await _userManager.FindByNameAsync(registerDTO.UserName);
+                if (userNameExists != null && userNameExists.UserName != user.UserName)
+                    return RequestResponse<string>.Failure(ErrorCode.Userexist, "Username is already taken.");
+
+                user.UserName = registerDTO.UserName;
+                user.FullName = registerDTO.FullName;
+                user.PhoneNumber = registerDTO.Phone;
+                user.Address = registerDTO.Address;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RequestResponse<string>.Failure(ErrorCode.UpdateFailed, $"Update failed: {errors}");
+            }
+
+            return RequestResponse<string>.Success("Profile updated successfully.");
+        }
 
     }
     
