@@ -64,7 +64,7 @@ namespace P2PDelivery.Application.Services
         {
             var founded = await _userManager.FindByNameAsync(username);
             if (founded == null)
-                return RequestResponse<string>.Failure(ErrorCode.Userexist, "user not exist: ");
+                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not exist: ");
            
             else
             {
@@ -123,6 +123,70 @@ namespace P2PDelivery.Application.Services
             return RequestResponse<string>.Failure(ErrorCode.DeleteFailed, "Failed to soft delete user.");
         }
 
+
+        public async Task<RequestResponse<string>> EditUserInfo(string UserName, UserProfile userProfile)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+
+            if (user == null || user.IsDeleted)
+                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not found");
+
+            // Optional checks for duplicate username/email
+            if (!string.IsNullOrWhiteSpace(userProfile.Email) && userProfile.Email != user.Email)
+            {
+                var emailExists = await _userManager.FindByEmailAsync(userProfile.Email);
+                if (emailExists != null && emailExists.UserName != user.UserName)
+                    return RequestResponse<string>.Failure(ErrorCode.EmailExist, "Email is already taken.");
+
+                user.Email = userProfile.Email;
+            }
+            if (!string.IsNullOrWhiteSpace(userProfile.UserName) && userProfile.UserName != user.UserName)
+            {
+                var userNameExists = await _userManager.FindByNameAsync(userProfile.UserName);
+                if (userNameExists != null && userNameExists.UserName != user.UserName)
+                    return RequestResponse<string>.Failure(ErrorCode.Userexist, "Username is already taken.");
+
+                user.UserName = userProfile.UserName;
+               
+
+            }
+
+            if (!string.IsNullOrWhiteSpace(userProfile.FullName))
+                user.FullName = userProfile.FullName;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Phone))
+                user.PhoneNumber = userProfile.Phone;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Address))
+                user.Address = userProfile.Address;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RequestResponse<string>.Failure(ErrorCode.UpdateFailed, $"Update failed: {errors}");
+            }
+
+            return RequestResponse<string>.Success("Profile updated successfully.");
+        }
+        public async Task<UserProfile> GetUserProfile(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user == null || user.IsDeleted)
+                return null;
+
+            return new UserProfile
+            {
+                UserName = user.UserName,
+                FullName = user.FullName,
+                Email = user.Email,
+                Address = user.Address,
+                NatId = user.NatId,
+                Phone = user.PhoneNumber
+            };
+        }
 
     }
     
