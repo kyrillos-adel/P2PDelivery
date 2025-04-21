@@ -57,15 +57,24 @@ namespace P2PDelivery.Application.Services
 
             }
         }
-        public async Task<RequestResponse<string>> GetByName(string username)
+        public async Task<RequestResponse<RegisterDTO>> GetByName(string username)
         {
             var founded = await _userManager.FindByNameAsync(username);
-           
+
             if (founded == null || founded.IsDeleted == true)
-                return RequestResponse<string>.Failure(ErrorCode.Userexist, "user not exist: ");
-           
+                return RequestResponse<RegisterDTO>.Failure(ErrorCode.UserNotExist, "user not exist: ");
+
             else
-                return RequestResponse<string>.Success(founded.FullName ," exist.");
+            {
+                var user = new RegisterDTO
+                {
+                    UserName = founded.UserName,
+                    FullName = founded.FullName ,
+                    Address = founded.Address,
+                    Phone =founded.PhoneNumber
+                };
+                return RequestResponse<RegisterDTO>.Success(user, " exist.");
+            }
         }
         
         public async Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto)
@@ -159,6 +168,23 @@ namespace P2PDelivery.Application.Services
             return RequestResponse<string>.Success("Profile updated successfully.");
         }
 
+        public async Task<RegisterDTO> GetUserProfile(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user == null || user.IsDeleted)
+                return null;
+
+            return new RegisterDTO
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Phone = user.PhoneNumber,
+                Address = user.Address,
+                FullName = user.FullName,
+                NatId = user.NatId
+            };
+        }
     }
     
 }

@@ -1,4 +1,5 @@
 using Azure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -40,12 +41,12 @@ namespace P2PDelivery.API.Controllers
 
 
 
-
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("findbyname")]
-        public async Task<ActionResult<RequestResponse<string>>> FindByName(string Name)
+        public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
         {
-
+            if (string.IsNullOrWhiteSpace(Name))
+                return BadRequest("Name parameter is required.");
             var respond = await _authService.GetByName(Name);
             if (respond.IsSuccess)
                 return Ok(respond);
@@ -76,6 +77,18 @@ namespace P2PDelivery.API.Controllers
                 return Ok(response);
 
             return BadRequest(response);
+        }
+
+        [HttpGet("get-user-profile")]
+        public async Task<ActionResult<RegisterDTO>> GetUserProfile()
+        {
+            var userName = User.FindFirstValue(ClaimTypes.Name);
+            var dto = await _authService.GetUserProfile(userName);
+
+            if (dto == null)
+                return NotFound("User not found");
+
+            return Ok(dto);
         }
     }
 }

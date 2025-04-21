@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using AutoMapper;
 using P2PDelivery.API.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -75,11 +75,6 @@ builder.Services.AddCors(opt =>
     {
         cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
-
-    opt.AddPolicy("SpecifcAllow", cfg =>
-    {
-        cfg.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod();
-    });
 });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -90,13 +85,25 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
-    options.Password.RequireDigit = true;  // Requires at least one digit
-    options.Password.RequireLowercase = true;  // Requires at least one lowercase letter
-    options.Password.RequireUppercase = true;  // Requires at least one uppercase letter
-    options.Password.RequiredLength = 8;  // Minimum length of the password
-    options.Password.RequireNonAlphanumeric = true;  // Requires at least one non-alphanumeric character (e.g., !, @, #)
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
     options.User.RequireUniqueEmail = true;
-}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+// ✅ Prevent redirect to /Account/Login (cookie-based behavior)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+});
 
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -111,27 +118,26 @@ JwtSettings.Initialize(builder.Configuration);
 var key = Encoding.UTF8.GetBytes(JwtSettings.SecretKey);
 
 
-builder.Services.AddAuthentication(opts =>
-{
-    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = JwtSettings.Issuer,
-        ValidateAudience = true,
-        ValidAudience = JwtSettings.Audience,
-        ValidateLifetime = true
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = JwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = JwtSettings.Audience,
+            ValidateLifetime = true
+        };
 
-    };
-});
+        // 👇 prevent redirect to /Account/Login on 401
+        
+    });
+
 
 builder.Services.AddAuthorization();
 
