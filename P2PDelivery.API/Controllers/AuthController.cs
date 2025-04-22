@@ -41,20 +41,20 @@ namespace P2PDelivery.API.Controllers
 
 
 
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[HttpGet("findbyname")]
+        //public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
+        //{
+        //    if (string.IsNullOrWhiteSpace(Name))
+        //        return BadRequest("Name parameter is required.");
+        //    var respond = await _authService.GetByName(Name);
+        //    if (respond.IsSuccess)
+        //        return Ok(respond);
+        //    return BadRequest(respond);
+
+        //}
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("findbyname")]
-        public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
-        {
-            if (string.IsNullOrWhiteSpace(Name))
-                return BadRequest("Name parameter is required.");
-            var respond = await _authService.GetByName(Name);
-            if (respond.IsSuccess)
-                return Ok(respond);
-            return BadRequest(respond);
-
-        }
-
-        [Authorize]
         [HttpDelete("delete-account")]
         public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
         {
@@ -67,7 +67,7 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(respond);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("update-profile")]
         public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody]UserProfile userProfile)
         {
@@ -80,7 +80,7 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(response);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("get-user-profile")]
         public async Task<ActionResult<RequestResponse<UserProfile>>> GetUserProfile()
         {
