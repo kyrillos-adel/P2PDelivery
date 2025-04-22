@@ -66,12 +66,13 @@ namespace P2PDelivery.API.Controllers
 
             return BadRequest(respond);
         }
+
         [Authorize]
         [HttpPut("update-profile")]
-        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody]UserProfile userProfile)
         {
             var UserName = User.FindFirstValue(ClaimTypes.Name);
-            var response = await _authService.EditUserInfo(UserName, registerDTO);
+            var response = await _authService.EditUserInfo(UserName, userProfile);
 
             if (response.IsSuccess)
                 return Ok(response);
@@ -79,16 +80,20 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(response);
         }
 
+        [Authorize]
         [HttpGet("get-user-profile")]
-        public async Task<ActionResult<RegisterDTO>> GetUserProfile()
+        public async Task<ActionResult<RequestResponse<UserProfile>>> GetUserProfile()
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);
-            var dto = await _authService.GetUserProfile(userName);
+            if (string.IsNullOrEmpty(userName))
+                return Unauthorized("invalid user");
 
-            if (dto == null)
-                return NotFound("User not found");
+            var profile = await _authService.GetUserProfile(userName);
+            if (profile == null)
+                return NotFound(profile);
 
-            return Ok(dto);
+            return Ok(profile);
         }
+
     }
 }
