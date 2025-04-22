@@ -1,4 +1,6 @@
-﻿namespace P2PDelivery.Application.DTOs;
+﻿using System.Text.Json.Serialization;
+
+namespace P2PDelivery.Application.DTOs;
 
 public class DeliveryRequestDTO
 {
@@ -13,5 +15,6 @@ public class DeliveryRequestDTO
     public double MinPrice { get; set; }
     public double MaxPrice { get; set; }
     public string Status { get; set; } // e.g. Pending, Accepted, Completed, Cancelled, Delivered
+    [JsonIgnore]
     public int UserId { get; set; }
 }

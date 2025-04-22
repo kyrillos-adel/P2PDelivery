@@ -29,11 +29,19 @@
         UpdateFailed = 212,
         // DeliveryRequest Errors
         DeliveryRequestNotExist = 300,
-        
+        DeliveryRequestAlreadyExist = 301,
+        DeliveryRequestCreated = 302,
+        DeliveryRequestFaliedDeleted = 303,
+        DeliveryRequestDeleted = 304,
+        DeliveryRequestUpdatedSuccessfully = 305,
+        DeliveryRequestUpdateFailed = 306,
+
+
 
 
 
         // Application Errors
+        ApplicationNotExist = 400,
 
 
         // Item Errors

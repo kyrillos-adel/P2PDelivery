@@ -27,4 +27,19 @@ public class ApplicationService : IApplicationService
 
         return RequestResponse<ICollection<ApplicationDTO>>.Success(applications);
     }
+
+
+    public async Task<RequestResponse<ICollection<DRApplicationDTO>>> GetMyApplicationsAsync(int userID)
+    {
+        var applications = _applicationRepository.GetAll(x => x.UserId == userID)
+            .Select(x => new DRApplicationDTO
+            {
+                ApplicationStatus = x.ApplicationStatus.ToString(),
+                Date = x.Date,
+                OfferedPrice = x.OfferedPrice,
+                DeliveryRequestId = x.DeliveryRequestId,
+                DeliveryTitle = x.DeliveryRequest.Title
+            }).ToList();
+        return RequestResponse<ICollection<DRApplicationDTO>>.Success(applications);
+    }
 }
