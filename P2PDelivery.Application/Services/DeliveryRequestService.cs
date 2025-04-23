@@ -63,6 +63,9 @@ namespace P2PDelivery.Application.Services
             return RequestResponse<List<DeliveryRequestDTO>>.Success(dtos);
         }
 
+
+
+
         //Delete Delivery Request
         public async Task<RequestResponse<DeliveryRequestDTO>> DeleteDeliveryRequestAsync(int id)
         {
@@ -76,10 +79,23 @@ namespace P2PDelivery.Application.Services
             var dto = _mapper.Map<DeliveryRequestDTO>(entity);
             return RequestResponse<DeliveryRequestDTO>.Success(dto, "Deleted Successfully");
         }
+        public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync()
+        {
+            var query = _requestRepository.GetAll();
+            var entities = await query.ToListAsync();
+
+            if (entities == null || !entities.Any())
+            {
+                return RequestResponse<List<DeliveryRequestDTO>>.Failure(ErrorCode.DeliveryRequestNotExist, "No delivery requests found.");
+            }
+
+            var dtos = _mapper.Map<List<DeliveryRequestDTO>>(entities);
+            return RequestResponse<List<DeliveryRequestDTO>>.Success(dtos);
+        }
 
 
 
-        
+
         public async Task<RequestResponse<DeliveryRequestDetailsDTO>> GetDeliveryRequestDetailsAsync(int deliveryId, int userID)
         {
             // validation

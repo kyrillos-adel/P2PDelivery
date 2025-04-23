@@ -22,12 +22,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swagger =>
 {
     // Basic info
@@ -66,7 +67,7 @@ builder.Services.AddSwaggerGen(swagger =>
 });
 
 
-builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
+
 
 // Add CORS policy
 builder.Services.AddCors(opt =>

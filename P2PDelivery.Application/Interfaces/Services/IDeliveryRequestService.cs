@@ -10,6 +10,7 @@ namespace P2PDelivery.Application.Interfaces.Services
     {
         Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto);
         Task<RequestResponse<DeliveryRequestDTO>> GetDeliveryRequestByIdAsync(int id);
+        Task<RequestResponse<List<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync();
         Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId);
         Task<RequestResponse<DeliveryRequestDTO>>DeleteDeliveryRequestAsync(int id);
 
