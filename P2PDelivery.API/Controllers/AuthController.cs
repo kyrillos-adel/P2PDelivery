@@ -1,7 +1,4 @@
-using Azure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
@@ -9,7 +6,7 @@ using P2PDelivery.Application.Response;
 using System.Security.Claims;
 namespace P2PDelivery.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -41,7 +38,7 @@ namespace P2PDelivery.API.Controllers
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize]
         [HttpGet("findbyname")]
         public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
         {
@@ -55,7 +52,7 @@ namespace P2PDelivery.API.Controllers
         }
 
         [Authorize]
-        [HttpDelete("delete-account")]
+        [HttpDelete("delete")]
         public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
         {
             var userName = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -67,7 +64,7 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(respond);
         }
         [Authorize]
-        [HttpPut("update-profile")]
+        [HttpPut("update")]
         public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
         {
             var UserName = User.FindFirstValue(ClaimTypes.Name);
@@ -79,7 +76,7 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("get-user-profile")]
+        [HttpGet("profile")]
         public async Task<ActionResult<RegisterDTO>> GetUserProfile()
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);

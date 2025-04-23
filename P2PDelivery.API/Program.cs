@@ -96,16 +96,6 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ✅ Prevent redirect to /Account/Login (cookie-based behavior)
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.StatusCode = 401;
-        return Task.CompletedTask;
-    };
-});
-
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
@@ -119,7 +109,12 @@ JwtSettings.Initialize(builder.Configuration);
 var key = Encoding.UTF8.GetBytes(JwtSettings.SecretKey);
 
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.SaveToken = true;
@@ -134,9 +129,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = JwtSettings.Audience,
             ValidateLifetime = true
         };
-
-        // 👇 prevent redirect to /Account/Login on 401
-        
     });
 
 
