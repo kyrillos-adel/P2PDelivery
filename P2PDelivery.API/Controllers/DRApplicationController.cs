@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
