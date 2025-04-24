@@ -16,6 +16,7 @@ public class CreateDeliveryRequestDTO
     public string PickUpLocation { get; set; }
 
     public string DropOffLocation { get; set; }
+    
 
     public DateTime PickUpDate { get; set; }
 

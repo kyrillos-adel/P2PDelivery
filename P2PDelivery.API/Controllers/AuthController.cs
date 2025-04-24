@@ -8,7 +8,7 @@ using P2PDelivery.Application.Response;
 using System.Security.Claims;
 namespace P2PDelivery.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class AuthController : ControllerBase
     {
