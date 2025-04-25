@@ -77,7 +77,7 @@ namespace P2PDelivery.API.Controllers
         }
         [Authorize]
         [HttpGet("profile")]
-        public async Task<ActionResult<RegisterDTO>> GetUserProfile()
+        public async Task<ActionResult<UserProfile>> GetUserProfile()
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);
             if (string.IsNullOrEmpty(userName))

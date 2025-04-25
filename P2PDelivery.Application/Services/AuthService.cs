@@ -137,7 +137,6 @@ namespace P2PDelivery.Application.Services
             if (user == null || user.IsDeleted)
                 return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not found");
 
-            // Optional checks for duplicate username/email
             if (!string.IsNullOrWhiteSpace(userProfile.Email) && userProfile.Email != user.Email)
             {
                 var emailExists = await _userManager.FindByEmailAsync(userProfile.Email);
@@ -154,11 +153,13 @@ namespace P2PDelivery.Application.Services
 
                 user.UserName = userProfile.UserName;
 
-
             }
 
             if (!string.IsNullOrWhiteSpace(userProfile.FullName))
                 user.FullName = userProfile.FullName;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Email))
+                user.Email = userProfile.Email;
 
             if (!string.IsNullOrWhiteSpace(userProfile.Phone))
                 user.PhoneNumber = userProfile.Phone;
@@ -166,6 +167,12 @@ namespace P2PDelivery.Application.Services
             if (!string.IsNullOrWhiteSpace(userProfile.Address))
                 user.Address = userProfile.Address;
 
+            user.UpdatedAt = DateTime.Now;
+            var editableUser = await _userManager.FindByNameAsync(userProfile.UserName);
+            if (editableUser != null)
+            {
+                user.UpdatedBy = editableUser.Id;
+            }
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
