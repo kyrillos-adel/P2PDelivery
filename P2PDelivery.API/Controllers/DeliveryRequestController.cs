@@ -106,7 +106,7 @@ public class DeliveryRequestController : ControllerBase
     [HttpGet("details/{deliveryID}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDetailsDTO>>> GetRequestDetails(int deliveryID)
     {
-        var userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var userID = GetUserIdFromToken();
 
         var response = await _deliveryRequestService.GetDeliveryRequestDetailsAsync(deliveryID,userID);
         if (response.IsSuccess)
