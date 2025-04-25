@@ -39,6 +39,12 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>,int>
             .WithMany()
             .HasForeignKey(c => c.UserBId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        modelBuilder.Entity<Chat>()
+            .HasOne(c => c.DeliveryRequest)
+            .WithMany()
+            .HasForeignKey(c => c.DeliveryRequestId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Payment>()
             .HasOne(p => p.Payer)
@@ -77,7 +83,14 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>,int>
 
         modelBuilder.Entity<ChatMessage>()
             .HasOne(cm => cm.Sender)
-            .WithOne()
+            .WithMany()
+            .HasForeignKey(cm => cm.SenderId)
+            .OnDelete(DeleteBehavior.NoAction);
+        
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne(cm => cm.Receiver)
+            .WithMany()
+            .HasForeignKey(cm => cm.ReceiverId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

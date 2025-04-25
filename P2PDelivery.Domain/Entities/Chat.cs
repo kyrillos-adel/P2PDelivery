@@ -16,5 +16,5 @@ public class Chat : BaseEntity
     public User? UserB { get; set; }
 
     /* Navigational properties */
-    public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+    public ICollection<ChatMessage>? Messages { get; set; } = new List<ChatMessage>();
 }

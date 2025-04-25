@@ -4,7 +4,7 @@ namespace P2PDelivery.Domain.Entities;
 
 public class ChatMessage : BaseEntity
 {
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.UtcNow; // Date when the message was sent
     
     public string Message { get; set; }
     
