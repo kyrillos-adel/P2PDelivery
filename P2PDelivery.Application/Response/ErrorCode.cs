@@ -16,7 +16,7 @@
         UserNotExist = 200,
         IdentityError = 201,
         ValidationError = 202,
-        Userexist = 212,
+       
         UserNotFound = 203,
         InvalidToken = 204,
         UserAlreadyDeleted = 205,
@@ -27,6 +27,8 @@
         LoginFailed = 210,
         InvalidPassword = 211,
         UpdateFailed = 212,
+        CanNotRecover = 213,
+        Userexist = 214,
         // DeliveryRequest Errors
         DeliveryRequestNotExist = 300,
         DeliveryRequestAlreadyExist = 301,
@@ -44,6 +46,7 @@
 
         // Application Errors
         ApplicationNotExist = 400,
+       
 
 
         // Item Errors

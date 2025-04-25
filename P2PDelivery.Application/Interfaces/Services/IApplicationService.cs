@@ -7,5 +7,6 @@ namespace P2PDelivery.Application.Interfaces.Services
     {
         Task<RequestResponse<ICollection<ApplicationDTO>>> GetApplicationByRequestAsync(int deliveryRequestID);
         Task<RequestResponse<ICollection<DRApplicationDTO>>> GetMyApplicationsAsync(int userID);
+        Task<RequestResponse<string>> UpdateApplication(int id, UpdateApplicatioDTO updateApplicatioDTO);
     }
 }
