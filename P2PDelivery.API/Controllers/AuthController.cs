@@ -56,7 +56,7 @@ namespace P2PDelivery.API.Controllers
         public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
         {
             var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var respond = await _authService.DeleteUserNameIdAsync(userName);
+            var respond = await _authService.DeleteUser(userName);
 
             if (respond.IsSuccess)
                 return Ok(respond);
@@ -65,27 +65,46 @@ namespace P2PDelivery.API.Controllers
         }
         [Authorize]
         [HttpPut("update")]
-        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] UserProfile userProfile)
         {
             var UserName = User.FindFirstValue(ClaimTypes.Name);
-            var response = await _authService.EditUserInfo(UserName, registerDTO);
+            var response = await _authService.EditUserInfo(UserName, userProfile);
 
             if (response.IsSuccess)
                 return Ok(response);
 
             return BadRequest(response);
         }
-
+        [Authorize]
         [HttpGet("profile")]
-        public async Task<ActionResult<RegisterDTO>> GetUserProfile()
+        public async Task<ActionResult<UserProfile>> GetUserProfile()
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);
-            var dto = await _authService.GetUserProfile(userName);
+            if (string.IsNullOrEmpty(userName))
+                return Unauthorized("invalid user");
 
-            if (dto == null)
-                return NotFound("User not found");
+            var profile = await _authService.GetUserProfile(userName);
+            if (profile == null)
+                return NotFound(profile);
 
-            return Ok(dto);
+            return Ok(profile);
         }
+      
+        [HttpPut("Recover")]
+        public async Task<ActionResult<RequestResponse<string>>> RecoverAccount([FromQuery] string user)
+        {
+            if (string.IsNullOrEmpty(user))
+                return NotFound("user not found ");
+            else
+            {
+              var respond = await _authService.RecoverMyAccount(user);
+                if (respond.IsSuccess)
+                {
+                    return Ok(respond);
+                }
+                return BadRequest(respond);
+            }
+        }
+
     }
 }

@@ -12,6 +12,9 @@ namespace P2PDelivery.Application.Services
         private readonly UserManager<User> _userManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
+        LoginResponseDTO _respond;
+        public LoginResponseDTO respond => _respond;
+
         public AuthService(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IJwtTokenGenerator jwtTokenGenerator)
         {
             _userManager = userManager;
@@ -60,10 +63,9 @@ namespace P2PDelivery.Application.Services
         public async Task<RequestResponse<RegisterDTO>> GetByName(string username)
         {
             var founded = await _userManager.FindByNameAsync(username);
-
-            if (founded == null || founded.IsDeleted == true)
-                return RequestResponse<RegisterDTO>.Failure(ErrorCode.UserNotExist, "user not exist: ");
-
+            if (founded == null)
+                return RequestResponse<RegisterDTO>.Failure(ErrorCode.UserNotFound, "user not exist: ");
+           
             else
             {
                 var user = new RegisterDTO
@@ -98,7 +100,7 @@ namespace P2PDelivery.Application.Services
             var token = await _jwtTokenGenerator.GenerateToken(user);
             var roles = await _userManager.GetRolesAsync(user);
 
-            var loginResponse = new LoginResponseDTO
+            _respond = new LoginResponseDTO
             {
                 Token = token,
                 Expiration = DateTime.Now.AddHours(1),
@@ -107,17 +109,18 @@ namespace P2PDelivery.Application.Services
                 Role = roles.ToList()
             };
 
-            return RequestResponse<LoginResponseDTO>.Success(loginResponse, "Login successful.");
+            return RequestResponse<LoginResponseDTO>.Success(_respond, "Login successful.");
         }
 
 
-        public async Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName)
+        public async Task<RequestResponse<string>> DeleteUser(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
             if (user == null)
                 return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "User not found.");
 
             user.IsDeleted = true;
+            user.DeletedAt = DateTime.Now;
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
@@ -127,36 +130,49 @@ namespace P2PDelivery.Application.Services
         }
 
 
-        public async Task<RequestResponse<string>> EditUserInfo(string UserName, RegisterDTO registerDTO)
+        public async Task<RequestResponse<string>> EditUserInfo(string UserName, UserProfile userProfile)
         {
             var user = await _userManager.FindByNameAsync(UserName);
 
             if (user == null || user.IsDeleted)
                 return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not found");
 
-            // Optional checks for duplicate username/email
-            if (!string.IsNullOrWhiteSpace(registerDTO.Email) && registerDTO.Email != user.Email)
+            if (!string.IsNullOrWhiteSpace(userProfile.Email) && userProfile.Email != user.Email)
             {
-                var emailExists = await _userManager.FindByEmailAsync(registerDTO.Email);
+                var emailExists = await _userManager.FindByEmailAsync(userProfile.Email);
                 if (emailExists != null && emailExists.UserName != user.UserName)
                     return RequestResponse<string>.Failure(ErrorCode.EmailExist, "Email is already taken.");
 
-                user.Email = registerDTO.Email;
-
+                user.Email = userProfile.Email;
             }
-
-            if (!string.IsNullOrWhiteSpace(registerDTO.UserName) && registerDTO.UserName != user.UserName)
+            if (!string.IsNullOrWhiteSpace(userProfile.UserName) && userProfile.UserName != user.UserName)
             {
-                var userNameExists = await _userManager.FindByNameAsync(registerDTO.UserName);
+                var userNameExists = await _userManager.FindByNameAsync(userProfile.UserName);
                 if (userNameExists != null && userNameExists.UserName != user.UserName)
                     return RequestResponse<string>.Failure(ErrorCode.Userexist, "Username is already taken.");
 
-                user.UserName = registerDTO.UserName;
-                user.FullName = registerDTO.FullName;
-                user.PhoneNumber = registerDTO.Phone;
-                user.Address = registerDTO.Address;
+                user.UserName = userProfile.UserName;
+
             }
 
+            if (!string.IsNullOrWhiteSpace(userProfile.FullName))
+                user.FullName = userProfile.FullName;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Email))
+                user.Email = userProfile.Email;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Phone))
+                user.PhoneNumber = userProfile.Phone;
+
+            if (!string.IsNullOrWhiteSpace(userProfile.Address))
+                user.Address = userProfile.Address;
+
+            user.UpdatedAt = DateTime.Now;
+            var editableUser = await _userManager.FindByNameAsync(userProfile.UserName);
+            if (editableUser != null)
+            {
+                user.UpdatedBy = editableUser.Id;
+            }
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
@@ -167,23 +183,40 @@ namespace P2PDelivery.Application.Services
 
             return RequestResponse<string>.Success("Profile updated successfully.");
         }
-
-        public async Task<RegisterDTO> GetUserProfile(string userName)
+        public async Task<UserProfile> GetUserProfile(string userName)
         {
             var user = await _userManager.FindByNameAsync(userName);
 
             if (user == null || user.IsDeleted)
                 return null;
 
-            return new RegisterDTO
+            return new UserProfile
             {
                 UserName = user.UserName,
-                Email = user.Email,
-                Phone = user.PhoneNumber,
-                Address = user.Address,
                 FullName = user.FullName,
-                NatId = user.NatId
+                Email = user.Email,
+                Address = user.Address,
+                NatId = user.NatId,
+                Phone = user.PhoneNumber
             };
+        }
+
+        public async Task<RequestResponse<string>> RecoverMyAccount(string username)
+        {
+            var user =await _userManager.FindByNameAsync(username);
+            if (user == null)
+                return RequestResponse<string>.Failure(ErrorCode.UserNotExist, "user do not exist");
+            else if ((DateTime.Now.Date - user.DeletedAt.Value.Date).TotalDays > 30)
+                return RequestResponse<string>.Failure(ErrorCode.CanNotRecover, "Sorry You con not Recover this Account Please Try to Register ");
+            else
+            {
+                user.IsDeleted = false;
+                user.DeletedAt = null;
+                user.DeletedBy = null;
+                var resspond =  await _userManager.UpdateAsync(user);
+                return RequestResponse<string>.Success("Recover Successful");
+
+            }
         }
     }
     
