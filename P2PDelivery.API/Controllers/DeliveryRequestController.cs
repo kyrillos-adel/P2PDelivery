@@ -3,6 +3,8 @@ using P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Response;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace P2PDelivery.API.Controllers;
 
@@ -19,52 +21,93 @@ public class DeliveryRequestController : ControllerBase
     }
 
 
-    [HttpPost]
-    //[Authorize]
-    public async Task<IActionResult> CreateDeliveryRequest([FromBody]CreateDeliveryRequestDTO dto)
+    private int GetUserIdFromToken()
     {
-        if(!ModelState.IsValid)
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out var userId) ? userId : 0;
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
+    {
+        if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                          .Select(e => e.ErrorMessage)
+                                          .ToList();
+            string errorMessage = string.Join("; ", errors);
+            var response = RequestResponse<DeliveryRequestDTO>.Failure(ErrorCode.ValidationError, errorMessage);
+            return BadRequest(response);
         }
 
-        var result = await _deliveryRequestService.CreateDeliveryRequestAsync(dto);
+        dto.UserId = GetUserIdFromToken(); //  Use here
 
-        if ( !result.IsSuccess)
-        {
-            return BadRequest("Failed to create delivery request");
-        }
-        return CreatedAtAction(nameof(GetDeliveryRequestById), new { id = result.Data.Id }, result.Data);
+        var requestResponse = await _deliveryRequestService.CreateDeliveryRequestAsync(dto);
 
+        if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestAlreadyExist)
+            return Conflict(requestResponse);
+
+        if (!requestResponse.IsSuccess)
+            return BadRequest(requestResponse);
+
+        return CreatedAtAction(nameof(GetDeliveryRequestById), new { id = requestResponse.Data.Id }, requestResponse);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetDeliveryRequestById(int id)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> GetDeliveryRequestById(int id)
     {
         var result = await _deliveryRequestService.GetDeliveryRequestByIdAsync(id);
-        if (!result.IsSuccess)
+
+        if (result.ErrorCode == ErrorCode.DeliveryRequestNotExist)
         {
-            return NotFound(result.Message);
+            return NotFound(result);
         }
-        return Ok(result.Data);
+
+        return Ok(result);
     }
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetDeliveryRequestsByUserId(int userId)
+    [Authorize]
+    [HttpGet("my")]
+    public async Task<ActionResult<RequestResponse<List<DeliveryRequestDTO>>>> GetMyDeliveryRequests()
     {
+        int userId = GetUserIdFromToken(); // Extract userId from the token
+
         var result = await _deliveryRequestService.GetDeliveryRequestsByUserIdAsync(userId);
+
+        if (result.ErrorCode == ErrorCode.UserNotFound || result.ErrorCode == ErrorCode.DeliveryRequestNotExist)
+        {
+            return NotFound(result);
+        }
+
+        return Ok(result);
+    }
+
+
+    //Get all delivery requests in database
+
+
+    [HttpGet]
+    public async Task<ActionResult<RequestResponse<List<DeliveryRequestDTO>>>> GetAllDeliveryRequests()
+    {
+        var result = await _deliveryRequestService.GetAllDeliveryRequestsAsync();
+
         if (!result.IsSuccess)
         {
-            return NotFound(result.Message);
+            return NotFound(result);
         }
-        return Ok(result.Data);
+
+        return Ok(result);
     }
+
+
 
 
     [HttpGet("details/{deliveryID}")]
-    public async Task<ActionResult<DeliveryRequestDetailsDTO>> GetRequestDetails(int deliveryID)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDetailsDTO>>> GetRequestDetails(int deliveryID)
     {
-        var userID = GetUserIdFromToken();//int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        //var userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var userID = 4;
 
         var response = await _deliveryRequestService.GetDeliveryRequestDetailsAsync(deliveryID,userID);
         if (response.IsSuccess)
@@ -74,7 +117,7 @@ public class DeliveryRequestController : ControllerBase
         return NotFound(response);
     }
 
-
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
     {
