@@ -38,7 +38,9 @@
         DeliveryRequestUpdatedSuccessfully = 305,
         DeliveryRequestUpdateFailed = 306,
 
-
+        
+        // Chat Errors
+        ChatNotFound = 350,
 
 
 
