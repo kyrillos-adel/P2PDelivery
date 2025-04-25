@@ -52,6 +52,7 @@ namespace P2PDelivery.Application.Services
         public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId)
         {
             var query = _requestRepository.GetAll(x => x.UserId == userId);
+            //var query = _requestRepository.GetAll().Include(r => r.User);
             var entities = await query.ToListAsync();
 
             if (entities == null || !entities.Any())
@@ -81,7 +82,7 @@ namespace P2PDelivery.Application.Services
         }
         public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync()
         {
-            var query = _requestRepository.GetAll();
+            var query = _requestRepository.GetAll().Include(r => r.User); 
             var entities = await query.ToListAsync();
 
             if (entities == null || !entities.Any())
@@ -92,6 +93,7 @@ namespace P2PDelivery.Application.Services
             var dtos = _mapper.Map<List<DeliveryRequestDTO>>(entities);
             return RequestResponse<List<DeliveryRequestDTO>>.Success(dtos);
         }
+
 
 
 

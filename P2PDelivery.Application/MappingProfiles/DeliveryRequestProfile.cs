@@ -11,7 +11,9 @@ namespace P2PDelivery.Application.MappingProfiles
         { 
 
            CreateMap<CreateDeliveryRequestDTO, DeliveryRequest>();
-            CreateMap<DeliveryRequest, DeliveryRequestDTO>();
+            CreateMap<DeliveryRequest, DeliveryRequestDTO>()
+             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+
         }
     }
 }

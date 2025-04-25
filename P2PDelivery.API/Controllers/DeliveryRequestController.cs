@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace P2PDelivery.API.Controllers;
 
 
-[Route("api/[controller]")]
+[Route("api/deliveryrequest")]
 [ApiController]
 [Authorize]
 public class DeliveryRequestController : ControllerBase
