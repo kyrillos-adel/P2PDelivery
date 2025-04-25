@@ -8,7 +8,9 @@ public interface IAuthService
     Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto);
     Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO);
     
-    Task<RequestResponse<string>> GetByName(string username);
+    Task<RequestResponse<RegisterDTO>> GetByName(string username);
 
     Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName);
+    Task<RequestResponse<string>> EditUserInfo(string UserName, RegisterDTO registerDTO);
+    Task<RegisterDTO> GetUserProfile(string userName);
 }

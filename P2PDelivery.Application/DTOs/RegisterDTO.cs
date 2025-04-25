@@ -1,5 +1,4 @@
-﻿using P2PDelivery.Application.CustomValidation;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 
 namespace P2PDelivery.Application.DTOs;
@@ -14,7 +13,7 @@ public class RegisterDTO
 
     [Required(ErrorMessage = "Name is required")]
     [StringLength(10, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]
-    [UniqueUserName]
+    
     public string UserName { get; set; }
 
     [Required(ErrorMessage = "Email is required")]
@@ -34,14 +33,4 @@ public class RegisterDTO
     [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$",
     ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.")]
     public string Password { get; set; }
-
-
-    [Required(ErrorMessage = "Please confirm your password")]
-    [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessage = "Passwords do not match")]
-    public string ConfirmPassword { get; set; }
-
-
-
-
 }

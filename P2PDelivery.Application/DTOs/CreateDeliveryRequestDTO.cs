@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 
 namespace P2PDelivery.Application.DTOs;
@@ -23,6 +24,7 @@ public class CreateDeliveryRequestDTO
 
     [DataType(DataType.Currency)]
     public double MaxPrice { get; set; }
+    [JsonIgnore]
     public int UserId { get; set; } // Get this from token in production
 
 }

@@ -4,68 +4,88 @@ using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using System.Security.Claims;
-
-
-namespace P2PDelivery.API.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class AuthController : ControllerBase
+namespace P2PDelivery.API.Controllers
 {
-    
-    private readonly IAuthService _authService;
-    public AuthController(IAuthService authService)
+    [Route("api/user")]
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        _authService = authService;
-    }
 
-    [HttpPost("login")]
-    public async Task<RequestResponse<LoginResponseDTO>> Login([FromBody] LoginDTO loginDto)
-    {
-        if (!ModelState.IsValid)
-            return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.ValidationError, "Invalid data provided.");
-
-        var response = await _authService.LoginAsync(loginDto);
-
-        if (response.IsSuccess)
+        IAuthService _authService;
+        public AuthController(IAuthService authService)
         {
-            return RequestResponse<LoginResponseDTO>.Success(response.Data, "User logged in successfully.");
+            _authService = authService;
         }
-        else
+
+        [HttpPost("login")]
+        public async Task<ActionResult<RequestResponse<LoginResponseDTO>>> Login([FromBody] LoginDTO loginDto)
         {
-            return RequestResponse<LoginResponseDTO>.Failure(response.ErrorCode, response.Message);
+            var respond = await _authService.LoginAsync(loginDto);
+            if (respond.IsSuccess)
+                return Ok(respond);
+            return BadRequest(respond);
         }
-    }
 
-    [HttpPost("Register")]
-    public async Task<RequestResponse<RegisterDTO>> Register(RegisterDTO registerDTO)
-    {
+        [HttpPost("Register")]
+        public async Task<ActionResult<RequestResponse<RegisterDTO>>> Register(RegisterDTO registerDTO)
+        {
 
-        return await _authService.RegisterAsync(registerDTO);
-    }
+            var respond = await _authService.RegisterAsync(registerDTO);
+            if (respond.IsSuccess)
+                return Ok(respond);
+            return BadRequest(respond);
+        }
 
 
-    [HttpGet("find-by-name")]
-    public async Task<RequestResponse<string>> FindByName(string Name)
-    {
-        return await _authService.GetByName(Name);
-            
-    }
 
-    [Authorize]
-    [HttpDelete("delete-account")]
-    public async Task<IActionResult> DeleteAccount()
-    {
-        var userName =  User.FindFirst(ClaimTypes.Name)?.Value;
+        [Authorize]
+        [HttpGet("findbyname")]
+        public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+                return BadRequest("Name parameter is required.");
+            var respond = await _authService.GetByName(Name);
+            if (respond.IsSuccess)
+                return Ok(respond);
+            return BadRequest(respond);
 
-        if (string.IsNullOrEmpty(userName))
-            return Unauthorized("User not authenticated.");
+        }
 
-        var result = await _authService.DeleteUserNameIdAsync(userName);
+        [Authorize]
+        [HttpDelete("delete")]
+        public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
+        {
+            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+            var respond = await _authService.DeleteUserNameIdAsync(userName);
 
-        if (result.IsSuccess)
-            return Ok(result.Message);
+            if (respond.IsSuccess)
+                return Ok(respond);
 
-        return BadRequest(result.Message);
+            return BadRequest(respond);
+        }
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
+        {
+            var UserName = User.FindFirstValue(ClaimTypes.Name);
+            var response = await _authService.EditUserInfo(UserName, registerDTO);
+
+            if (response.IsSuccess)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
+        [HttpGet("profile")]
+        public async Task<ActionResult<RegisterDTO>> GetUserProfile()
+        {
+            var userName = User.FindFirstValue(ClaimTypes.Name);
+            var dto = await _authService.GetUserProfile(userName);
+
+            if (dto == null)
+                return NotFound("User not found");
+
+            return Ok(dto);
+        }
     }
 }
