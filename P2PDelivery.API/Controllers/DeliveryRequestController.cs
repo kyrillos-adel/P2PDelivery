@@ -11,7 +11,6 @@ namespace P2PDelivery.API.Controllers;
 
 [Route("api/deliveryrequest")]
 [ApiController]
-[Authorize]
 public class DeliveryRequestController : ControllerBase
 {
     private readonly IDeliveryRequestService _deliveryRequestService;
@@ -28,6 +27,7 @@ public class DeliveryRequestController : ControllerBase
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
     {
@@ -104,10 +104,9 @@ public class DeliveryRequestController : ControllerBase
 
 
     [HttpGet("details/{deliveryID}")]
-    public async Task<ActionResult<DeliveryRequestDetailsDTO>> GetRequestDetails(int deliveryID)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDetailsDTO>>> GetRequestDetails(int deliveryID)
     {
-        //var userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var userID = 4;
+        var userID = GetUserIdFromToken();
 
         var response = await _deliveryRequestService.GetDeliveryRequestDetailsAsync(deliveryID,userID);
         if (response.IsSuccess)
@@ -117,7 +116,7 @@ public class DeliveryRequestController : ControllerBase
         return NotFound(response);
     }
 
-
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
     {
