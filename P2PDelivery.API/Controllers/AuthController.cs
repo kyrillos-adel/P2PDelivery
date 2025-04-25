@@ -56,7 +56,7 @@ namespace P2PDelivery.API.Controllers
         public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
         {
             var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var respond = await _authService.DeleteUserNameIdAsync(userName);
+            var respond = await _authService.DeleteUser(userName);
 
             if (respond.IsSuccess)
                 return Ok(respond);
@@ -75,7 +75,7 @@ namespace P2PDelivery.API.Controllers
 
             return BadRequest(response);
         }
-
+        [Authorize]
         [HttpGet("profile")]
         public async Task<ActionResult<RegisterDTO>> GetUserProfile()
         {
@@ -88,6 +88,22 @@ namespace P2PDelivery.API.Controllers
                 return NotFound(profile);
 
             return Ok(profile);
+        }
+      
+        [HttpPut("Recover")]
+        public async Task<ActionResult<RequestResponse<string>>> RecoverAccount([FromQuery] string user)
+        {
+            if (string.IsNullOrEmpty(user))
+                return NotFound("user not found ");
+            else
+            {
+              var respond = await _authService.RecoverMyAccount(user);
+                if (respond.IsSuccess)
+                {
+                    return Ok(respond);
+                }
+                return BadRequest(respond);
+            }
         }
 
     }

@@ -5,15 +5,17 @@ namespace P2PDelivery.Application.Interfaces.Services;
 
 public interface IAuthService
 {
+    LoginResponseDTO respond {  get; }
     Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto);
     Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO);
     Task<RequestResponse<RegisterDTO>> GetByName(string username);
-    Task<RequestResponse<string>> DeleteUserNameIdAsync(string UserName);
+    Task<RequestResponse<string>> DeleteUser(string UserName);
 
    
     Task<UserProfile> GetUserProfile(string userName);
 
     Task<RequestResponse<string>> EditUserInfo(string UserName, UserProfile userProfile);
+    Task<RequestResponse<string>> RecoverMyAccount( string username);
 
 
 }
