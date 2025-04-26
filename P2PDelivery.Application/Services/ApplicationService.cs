@@ -5,7 +5,6 @@ using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
-using System.Security.Claims;
 
 namespace P2PDelivery.Application.Services;
 
@@ -28,17 +27,29 @@ public class ApplicationService : IApplicationService
 
     public UserManager<User> UserManager { get; }
 
-    public async Task<RequestResponse<ICollection<ApplicationDTO>>> GetApplicationByRequestAsync(int deliveryRequestID)
+    public async Task<RequestResponse<ICollection<ApplicationDTO>>> GetApplicationByRequestAsync(int deliveryRequestID, int userID)
     {
-        
-        var applications = _applicationRepository.GetAll(x => x.DeliveryRequestId == deliveryRequestID)
-            .Select(x => new ApplicationDTO{
-                ApplicationStatus = x.ApplicationStatus.ToString(),
-                Date = x.Date,
-                OfferedPrice = x.OfferedPrice,
-                UserId = x.UserId,
-                UserName=x.User.FullName
-            }).ToList();
+        var isRequestExist = await _deliveryRequestService.IsDeliveryRequestExist(deliveryRequestID);
+        if (!isRequestExist)
+        {
+            return RequestResponse<ICollection<ApplicationDTO>>.Failure(ErrorCode.DeliveryRequestNotExist, "This Delivery Request is not Exist");
+        }
+        var requestUserID = _applicationRepository.GetAll(x => x.DeliveryRequestId == deliveryRequestID)
+                .Select(x => x.DeliveryRequest.UserId).FirstOrDefault();
+        if(requestUserID != userID)
+        {
+            return RequestResponse<ICollection<ApplicationDTO>>.Failure(ErrorCode.Unauthorized, "You don't have permission to access applications for delivery requests that you don't own.");
+        }
+
+        var applications = _mapper.ProjectTo<ApplicationDTO>(_applicationRepository.GetAll(x => x.DeliveryRequestId == deliveryRequestID)).ToList();
+            
+            //.Select(x => new ApplicationDTO{
+            //    ApplicationStatus = x.ApplicationStatus.ToString(),
+            //    Date = x.Date,
+            //    OfferedPrice = x.OfferedPrice,
+            //    UserId = x.UserId,
+            //    UserName=x.User.FullName
+            //}).ToList();
 
         return RequestResponse<ICollection<ApplicationDTO>>.Success(applications);
     }
