@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 using P2PDelivery.Application.Interfaces.Services;
 
 namespace P2PDelivery.API.Hubs;
@@ -15,7 +16,8 @@ public class ChatHub : Hub
 
     public override Task OnConnectedAsync()
     {
-        var userId = Context.GetHttpContext().Request.Query["userId"].ToString();
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
         if (!string.IsNullOrEmpty(userId))
             userConnections[userId] = Context.ConnectionId;
 
@@ -24,17 +26,18 @@ public class ChatHub : Hub
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        var userId = Context.UserIdentifier;
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
         if (!string.IsNullOrEmpty(userId))
             userConnections.Remove(userId);
 
         return base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessageToUser(string senderId, string receiverId, string message/*, int deliveryRequestId*/)
+    public async Task SendMessageToUser(string receiverId, string message/*, int deliveryRequestId*/)
     {
         // Get the sender's ID from the hub caller context
-        
+        var senderId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         // Check if the senderId is a valid integer
         if (!int.TryParse(senderId, out var senderIdInt))
