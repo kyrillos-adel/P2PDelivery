@@ -76,7 +76,7 @@ builder.Services.AddCors(opt =>
     opt.AddPolicy("AllowAll", cfg =>
     {
         cfg
-            .WithOrigins("http://192.168.1.5:5500", "http://localhost:4200", "https://localhost:4200")
+            .WithOrigins("http://192.168.132.208:5500", "http://localhost:4200", "https://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -139,6 +139,24 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidAudience = JwtSettings.Audience,
             ValidateLifetime = true
+        };
+
+        options.Events = new JwtBearerEvents()
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                // If the request is for our hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/chathub"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
 
