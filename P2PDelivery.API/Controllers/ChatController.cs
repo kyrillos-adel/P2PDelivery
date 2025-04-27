@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs.ChatDTOs;
 using P2PDelivery.Application.Interfaces.Services;
@@ -7,6 +9,7 @@ namespace P2PDelivery.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
@@ -20,7 +23,14 @@ namespace P2PDelivery.API.Controllers
         [HttpGet("{chatId}")]
         public async Task<ActionResult<RequestResponse<ChatDto>>> GetChatById(int chatId)
         {
-            var response = await _chatService.GetChatById(chatId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userId, out int userIdInt))
+                return BadRequest();
+            
+            var response = await _chatService.GetChatById(chatId, userIdInt);
+            
+            if (response.ErrorCode == ErrorCode.UnAuthorize)
+                return Unauthorized(response);
             
             if (!response.IsSuccess)
                 return NotFound(response);
@@ -28,10 +38,12 @@ namespace P2PDelivery.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<RequestResponse<ICollection<ChatDto>>>> GetChatsByUserId(int userId)
+        [HttpGet("user")]
+        public async Task<ActionResult<RequestResponse<ICollection<ChatDto>>>> GetUserChats()
         {
-            var response = await _chatService.GetChatsByUserId(userId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            var response = await _chatService.GetChatsByUserId(int.Parse(userId));
             
             if (!response.IsSuccess)
                 return NotFound(response);
