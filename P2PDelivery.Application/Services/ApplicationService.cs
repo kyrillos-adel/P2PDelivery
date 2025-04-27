@@ -34,6 +34,7 @@ public class ApplicationService : IApplicationService
         var applications = _applicationRepository.GetAll(x => x.UserId == userID)
             .Select(x => new DRApplicationDTO
             {
+                Id = x.Id,
                 ApplicationStatus = x.ApplicationStatus.ToString(),
                 Date = x.Date,
                 OfferedPrice = x.OfferedPrice,

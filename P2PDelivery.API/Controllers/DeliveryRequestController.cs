@@ -11,7 +11,7 @@ namespace P2PDelivery.API.Controllers;
 
 [Route("api/deliveryrequest")]
 [ApiController]
-[Authorize]
+
 public class DeliveryRequestController : ControllerBase
 {
     private readonly IDeliveryRequestService _deliveryRequestService;
@@ -27,7 +27,7 @@ public class DeliveryRequestController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
-
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
     {
@@ -53,7 +53,7 @@ public class DeliveryRequestController : ControllerBase
 
         return CreatedAtAction(nameof(GetDeliveryRequestById), new { id = requestResponse.Data.Id }, requestResponse);
     }
-
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> GetDeliveryRequestById(int id)
     {
@@ -117,7 +117,7 @@ public class DeliveryRequestController : ControllerBase
         return NotFound(response);
     }
 
-
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
     {
@@ -128,7 +128,7 @@ public class DeliveryRequestController : ControllerBase
         return Ok(requestResponse);
     }
 
-
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult<RequestResponse<bool>>> Delete(int id)
     {
