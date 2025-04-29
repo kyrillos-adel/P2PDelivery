@@ -27,8 +27,9 @@ public class DeliveryRequestController : ControllerBase
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 
-    [Authorize]
+    
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
     {
         if (!ModelState.IsValid)
@@ -53,7 +54,7 @@ public class DeliveryRequestController : ControllerBase
 
         return CreatedAtAction(nameof(GetDeliveryRequestById), new { id = requestResponse.Data.Id }, requestResponse);
     }
-
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> GetDeliveryRequestById(int id)
     {
@@ -127,7 +128,7 @@ public class DeliveryRequestController : ControllerBase
         return Ok(requestResponse);
     }
 
-
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult<RequestResponse<bool>>> Delete(int id)
     {
