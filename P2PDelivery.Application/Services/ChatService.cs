@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Application.DTOs.ChatDTOs;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
@@ -57,19 +58,27 @@ public class ChatService : IChatService
         return RequestResponse<ChatMessageDto>.Success(_mapper.Map<ChatMessageDto>(chatMessage), "Message sent successfully");
     }
 
-    public async Task<RequestResponse<ChatDto>> GetChatById(int chatId)
+    public async Task<RequestResponse<ChatDto>> GetChatById(int chatId, int userId)
     {
         var chat = await _chatRepository.GetByIDAsync(chatId);
         if (chat == null)
             return RequestResponse<ChatDto>.Failure(ErrorCode.ChatNotFound, "Chat not found");
+
+        if (chat.UserAId == userId || chat.UserBId == userId)
+        {
+            var chatDto = _mapper.Map<ChatDto>(chat);
+            return RequestResponse<ChatDto>.Success(chatDto);
+        }
         
-        var chatDto = _mapper.Map<ChatDto>(chat);
-        return RequestResponse<ChatDto>.Success(chatDto);
+        return RequestResponse<ChatDto>.Failure(ErrorCode.Unauthorized, "You are not authorized to view this chat");
     }
+    
 
     public async Task<RequestResponse<ICollection<ChatDto>>> GetChatsByUserId(int userId)
     {
-        var chats = _chatRepository.GetAll(c => c.UserAId == userId || c.UserBId == userId).ToList();
+        var chats = _chatRepository.GetAll(c => c.UserAId == userId || c.UserBId == userId)
+            .Include(chat => chat.Messages)
+            .ToList();
         
         if (chats == null || !chats.Any())
             return RequestResponse<ICollection<ChatDto>>.Failure(ErrorCode.ChatNotFound, "This user has no chats");

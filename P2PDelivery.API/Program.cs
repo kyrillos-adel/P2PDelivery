@@ -79,7 +79,8 @@ builder.Services.AddCors(opt =>
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        /*.UseLazyLoadingProxies()*/;
 });
 
 
@@ -181,6 +182,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chathub");
+app.MapHub<ChatHub>("/hub/chat");
 
 app.Run();
