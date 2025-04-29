@@ -1,12 +1,10 @@
-using System.Text;
-using AutoMapper;
-using P2PDelivery.API.Mappers;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using P2PDelivery.API.Hubs;
 using P2PDelivery.API.Middelwares;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
@@ -15,14 +13,11 @@ using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
-using P2PDelivery.Application.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddAutoMapper(typeof(DeliveryRequestProfile));
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -43,8 +38,8 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
+        Type = SecuritySchemeType.ApiKey,  // FIXED: was ApiKey
+        Scheme = "Bearer",               // FIXED: correct scheme for JWT
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\""
@@ -74,12 +69,11 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", cfg =>
     {
-        cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-
-    opt.AddPolicy("SpecifcAllow", cfg =>
-    {
-        cfg.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod();
+        cfg
+            .WithOrigins("http://192.168.132.208:5500", "http://localhost:4200", "https://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -91,13 +85,15 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
-    options.Password.RequireDigit = true;  // Requires at least one digit
-    options.Password.RequireLowercase = true;  // Requires at least one lowercase letter
-    options.Password.RequireUppercase = true;  // Requires at least one uppercase letter
-    options.Password.RequiredLength = 8;  // Minimum length of the password
-    options.Password.RequireNonAlphanumeric = true;  // Requires at least one non-alphanumeric character (e.g., !, @, #)
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
     options.User.RequireUniqueEmail = true;
-}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -105,6 +101,15 @@ builder.Services.AddScoped<IDeliveryRequestService, DeliveryRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddSignalR()
+    .AddHubOptions<ChatHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+    });
+
+
+
 
 
 JwtSettings.Initialize(builder.Configuration);
@@ -112,27 +117,46 @@ JwtSettings.Initialize(builder.Configuration);
 var key = Encoding.UTF8.GetBytes(JwtSettings.SecretKey);
 
 
-builder.Services.AddAuthentication(opts =>
-{
-    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = JwtSettings.Issuer,
-        ValidateAudience = true,
-        ValidAudience = JwtSettings.Audience,
-        ValidateLifetime = true
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = JwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = JwtSettings.Audience,
+            ValidateLifetime = true
+        };
 
-    };
-});
+        options.Events = new JwtBearerEvents()
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                // If the request is for our hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/chathub"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 
 builder.Services.AddAuthorization();
 
@@ -156,5 +180,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

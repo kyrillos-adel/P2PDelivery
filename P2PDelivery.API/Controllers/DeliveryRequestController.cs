@@ -27,6 +27,7 @@ public class DeliveryRequestController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
+
     [Authorize]
     [HttpPost]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
@@ -104,10 +105,9 @@ public class DeliveryRequestController : ControllerBase
 
 
     [HttpGet("details/{deliveryID}")]
-    public async Task<ActionResult<DeliveryRequestDetailsDTO>> GetRequestDetails(int deliveryID)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDetailsDTO>>> GetRequestDetails(int deliveryID)
     {
-        //var userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var userID = 4;
+        var userID = GetUserIdFromToken();
 
         var response = await _deliveryRequestService.GetDeliveryRequestDetailsAsync(deliveryID,userID);
         if (response.IsSuccess)

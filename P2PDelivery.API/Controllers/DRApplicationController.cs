@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
@@ -10,7 +8,7 @@ using System.Security.Claims;
 namespace P2PDelivery.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+  //  [Authorize]
     [ApiController]
     public class DRApplicationController : ControllerBase
     {
@@ -20,6 +18,7 @@ namespace P2PDelivery.API.Controllers
         public DRApplicationController(IApplicationService applicationService )
         {
             _applicationService = applicationService;
+            
         }
 
 
@@ -39,6 +38,25 @@ namespace P2PDelivery.API.Controllers
             }
 
             return Ok(result);
+        }
+        [HttpPut("update")]
+        public async  Task<ActionResult<RequestResponse<string>>> UpdateApplication(int id ,[FromBody]UpdateApplicatioDTO updateApplicatioDTO)
+        {
+
+           
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            else
+            {
+                var respond = await _applicationService.UpdateApplication(id, updateApplicatioDTO);
+                if (respond.IsSuccess)
+                    return Ok(respond);
+                return BadRequest(respond);
+            }
+
         }
 
 

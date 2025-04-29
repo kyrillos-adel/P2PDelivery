@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PDelivery.Infrastructure.Contexts;
 
@@ -11,9 +12,11 @@ using P2PDelivery.Infrastructure.Contexts;
 namespace P2PDelivery.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250424203451_SolvingUniqueIndexOnChatMessageSenderAndReceiverId")]
+    partial class SolvingUniqueIndexOnChatMessageSenderAndReceiverId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,9 +181,6 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Property<int>("DeliveryRequestId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DeliveryRequestId1")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -198,11 +198,8 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeliveryRequestId");
-
-                    b.HasIndex("DeliveryRequestId1")
-                        .IsUnique()
-                        .HasFilter("[DeliveryRequestId1] IS NOT NULL");
+                    b.HasIndex("DeliveryRequestId")
+                        .IsUnique();
 
                     b.HasIndex("UserAId");
 
@@ -682,13 +679,6 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefreshToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -772,14 +762,10 @@ namespace P2PDelivery.Infrastructure.Migrations
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Chat", b =>
                 {
                     b.HasOne("P2PDelivery.Domain.Entities.DeliveryRequest", "DeliveryRequest")
-                        .WithMany()
-                        .HasForeignKey("DeliveryRequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("P2PDelivery.Domain.Entities.DeliveryRequest", null)
                         .WithOne("Chat")
-                        .HasForeignKey("P2PDelivery.Domain.Entities.Chat", "DeliveryRequestId1");
+                        .HasForeignKey("P2PDelivery.Domain.Entities.Chat", "DeliveryRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("P2PDelivery.Domain.Entities.User", "UserA")
                         .WithMany("Chats")
