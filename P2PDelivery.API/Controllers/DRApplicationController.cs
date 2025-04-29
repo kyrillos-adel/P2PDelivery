@@ -70,9 +70,28 @@ namespace P2PDelivery.API.Controllers
             var userID = GetUserIdFromToken();
             if (userID == 0)
             {
-                return BadRequest(RequestResponse<bool>.Failure(ErrorCode.Unauthorized, "You don't have the permission to add an application for another user."));
+                return Unauthorized(RequestResponse<bool>.Failure(ErrorCode.Unauthorized, "You don't have the permission to add an application for another user."));
             }
             var response = await _applicationService.AddApplicationAsync(addApplicationDTO, userID);
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<RequestResponse<ApplicationDTO>>> GetApplications(int requestID)
+        {
+            var userID = GetUserIdFromToken();
+
+            var response = await _applicationService.GetApplicationByRequestAsync(requestID,userID);
+            if(response.ErrorCode == ErrorCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+
             if (!response.IsSuccess)
             {
                 return BadRequest(response);
