@@ -108,6 +108,8 @@ namespace P2PDelivery.Application.Services
             var deliveryRequestDTO = _requestRepository.GetAll(x => x.Id == deliveryId)
                 .Select(x => new DeliveryRequestDetailsDTO
                 {
+                    Id = x.Id,
+                    Title = x.Title,
                     Description = x.Description,
                     DropOffLocation = x.DropOffLocation,
                     PickUpLocation = x.PickUpLocation,
@@ -115,7 +117,6 @@ namespace P2PDelivery.Application.Services
                     MaxPrice = x.MaxPrice,
                     MinPrice = x.MinPrice,
                     Status = x.Status.ToString(),
-                    Title = x.Title,
                     TotalWeight = x.TotalWeight,
                     UserName=x.User.FullName,
                     UserId = x.UserId
