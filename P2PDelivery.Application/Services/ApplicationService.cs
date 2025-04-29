@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
@@ -13,11 +14,16 @@ public class ApplicationService : IApplicationService
     private readonly IRepository<DRApplication> _applicationRepository;
     private readonly IAuthService _authService;
     private readonly UserManager<User> _userManager;
-    public ApplicationService(IRepository<DRApplication> applicationRepository,IAuthService authService,UserManager<User> userManager)
+    private readonly IMapper _mapper;
+    private readonly IDeliveryRequestService _deliveryRequestService;
+    public ApplicationService(IRepository<DRApplication> applicationRepository,IAuthService authService,
+                            UserManager<User> userManager, IMapper mapper, IDeliveryRequestService deliveryRequestService)
     {
         _applicationRepository = applicationRepository;
         _authService = authService;
         _userManager = userManager;
+        _mapper = mapper;
+        _deliveryRequestService = deliveryRequestService;
     }
 
     public UserManager<User> UserManager { get; }
@@ -68,6 +74,23 @@ public class ApplicationService : IApplicationService
             await _applicationRepository.SaveChangesAsync();
             return RequestResponse<string>.Success("Updated done");
         }
+
+    }
+
+    public async Task<RequestResponse<bool>> AddApplicationAsync(AddApplicationDTO addApplicationDTO, int userID)
+    {
+        var isRequestExist = await _deliveryRequestService.IsDeliveryRequestExist(addApplicationDTO.DeliveryRequestId);
+        if (!isRequestExist)
+        {
+            return RequestResponse<bool>.Failure(ErrorCode.DeliveryRequestNotExist, "This Delivery Request is not Exist");
+        }
+        var application = _mapper.Map<DRApplication>(addApplicationDTO);
+        application.UserId= userID;
+        application.Date = DateTime.Now;
+        await _applicationRepository.AddAsync(application);
+        await _applicationRepository.SaveChangesAsync();
+
+        return RequestResponse<bool>.Success(true);
 
     }
 }

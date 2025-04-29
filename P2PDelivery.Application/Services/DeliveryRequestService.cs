@@ -6,7 +6,8 @@ using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
-using P2PDelivery.Domain.Enums;
+using P2PDelivery.Application.DTOs.ApplicationDTOs;
+
 
 namespace P2PDelivery.Application.Services
 {
@@ -14,13 +15,11 @@ namespace P2PDelivery.Application.Services
     {
         private readonly IRepository<DeliveryRequest> _requestRepository;
         private readonly IMapper _mapper;
-        private readonly IApplicationService _applicationSevice;
 
-        public DeliveryRequestService(IRepository<DeliveryRequest> requestRepository, IMapper mapper, IApplicationService applicationSevice)
+        public DeliveryRequestService(IRepository<DeliveryRequest> requestRepository, IMapper mapper)
         {
             _requestRepository = requestRepository;
             _mapper = mapper;
-            _applicationSevice = applicationSevice;
         }
 
         public async Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto)
@@ -124,12 +123,11 @@ namespace P2PDelivery.Application.Services
 
             if (deliveryRequestDTO.UserId == userID)
             {
-                var response = await _applicationSevice.GetApplicationByRequestAsync(deliveryId);
-                if (!response.IsSuccess)
-                {
-                    return RequestResponse<DeliveryRequestDetailsDTO>.Failure(response.ErrorCode, response.Message);
-                }
-                deliveryRequestDTO.ApplicationDTOs = response.Data;
+                var response = _mapper.ProjectTo<ApplicationDTO>(_requestRepository.GetAll(x => x.Id == deliveryId)
+                            .SelectMany(x => x.Applications))
+                    .ToList();
+                    
+                deliveryRequestDTO.ApplicationDTOs = response;
             }
 
             return RequestResponse<DeliveryRequestDetailsDTO>.Success(deliveryRequestDTO);
