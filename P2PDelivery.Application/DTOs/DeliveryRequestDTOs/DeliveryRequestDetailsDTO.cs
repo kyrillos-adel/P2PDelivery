@@ -6,6 +6,7 @@ namespace P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
 
 public class DeliveryRequestDetailsDTO
 {
+    public int Id { get; set; }
     [StringLength(50)]
     public string Title { get; set; }
 

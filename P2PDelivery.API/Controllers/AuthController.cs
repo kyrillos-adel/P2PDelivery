@@ -1,6 +1,4 @@
-using Azure;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
@@ -40,12 +38,12 @@ namespace P2PDelivery.API.Controllers
 
 
 
-
         [Authorize]
         [HttpGet("findbyname")]
-        public async Task<ActionResult<RequestResponse<string>>> FindByName(string Name)
+        public async Task<ActionResult<RequestResponse<RegisterDTO>>> FindByName(string Name)
         {
-
+            if (string.IsNullOrWhiteSpace(Name))
+                return BadRequest("Name parameter is required.");
             var respond = await _authService.GetByName(Name);
             if (respond.IsSuccess)
                 return Ok(respond);
@@ -54,11 +52,11 @@ namespace P2PDelivery.API.Controllers
         }
 
         [Authorize]
-        [HttpDelete("delete-account")]
+        [HttpDelete("delete")]
         public async Task<ActionResult<RequestResponse<string>>> DeleteAccount()
         {
             var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var respond = await _authService.DeleteUserNameIdAsync(userName);
+            var respond = await _authService.DeleteUser(userName);
 
             if (respond.IsSuccess)
                 return Ok(respond);
@@ -66,16 +64,47 @@ namespace P2PDelivery.API.Controllers
             return BadRequest(respond);
         }
         [Authorize]
-        [HttpPut("update-profile")]
-        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] RegisterDTO registerDTO)
+        [HttpPut("update")]
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] UserProfile userProfile)
         {
             var UserName = User.FindFirstValue(ClaimTypes.Name);
-            var response = await _authService.EditUserInfo(UserName, registerDTO);
+            var response = await _authService.EditUserInfo(UserName, userProfile);
 
             if (response.IsSuccess)
                 return Ok(response);
 
             return BadRequest(response);
         }
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<UserProfile>> GetUserProfile()
+        {
+            var userName = User.FindFirstValue(ClaimTypes.Name);
+            if (string.IsNullOrEmpty(userName))
+                return Unauthorized("invalid user");
+
+            var profile = await _authService.GetUserProfile(userName);
+            if (profile == null)
+                return NotFound(profile);
+
+            return Ok(profile);
+        }
+      
+        [HttpPut("Recover")]
+        public async Task<ActionResult<RequestResponse<string>>> RecoverAccount([FromQuery] string user)
+        {
+            if (string.IsNullOrEmpty(user))
+                return NotFound("user not found ");
+            else
+            {
+              var respond = await _authService.RecoverMyAccount(user);
+                if (respond.IsSuccess)
+                {
+                    return Ok(respond);
+                }
+                return BadRequest(respond);
+            }
+        }
+
     }
 }

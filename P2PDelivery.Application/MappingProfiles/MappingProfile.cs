@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using P2PDelivery.Application.DTOs;
+using P2PDelivery.Application.DTOs.ChatDTOs;
 using P2PDelivery.Domain.Entities;
 
 namespace P2PDelivery.Application.MappingProfiles;
@@ -10,6 +11,14 @@ public class MappingProfile : Profile
     {
         CreateMap<DeliveryRequest, DeliveryRequestUpdateDto>()
             .ForMember(dest => dest.TotalWeight, opt => opt.MapFrom(src => src.Items.Sum(i => i.Weight)))
-            .ReverseMap();;
+            .ReverseMap();
+        
+        CreateMap<Chat, ChatDto>()
+            // .ForMember()
+            .ReverseMap();
+
+        CreateMap<ChatMessage, ChatMessageDto>()
+            // .ForMember()
+            .ReverseMap();
     }
 }
