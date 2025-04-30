@@ -20,7 +20,11 @@ namespace P2PDelivery.API.Controllers
             _applicationService = applicationService;
             
         }
-
+        private int GetUserIdFromToken()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out var userId) ? userId : 0;
+        }
 
         [HttpGet("GetMyApplications")]
         public async Task<ActionResult<RequestResponse<ICollection<DRApplicationDTO>>>> GetMyApplicationsAsync()
@@ -59,6 +63,40 @@ namespace P2PDelivery.API.Controllers
 
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult<RequestResponse<bool>>> AddApplication(AddApplicationDTO addApplicationDTO)
+        {
+            var userID = GetUserIdFromToken();
+            if (userID == 0)
+            {
+                return Unauthorized(RequestResponse<bool>.Failure(ErrorCode.Unauthorized, "You don't have the permission to add an application for another user."));
+            }
+            var response = await _applicationService.AddApplicationAsync(addApplicationDTO, userID);
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<RequestResponse<ApplicationDTO>>> GetApplications(int requestID)
+        {
+            var userID = GetUserIdFromToken();
+
+            var response = await _applicationService.GetApplicationByRequestAsync(requestID,userID);
+            if(response.ErrorCode == ErrorCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

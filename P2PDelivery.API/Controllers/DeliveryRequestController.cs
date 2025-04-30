@@ -11,7 +11,6 @@ namespace P2PDelivery.API.Controllers;
 
 [Route("api/deliveryrequest")]
 [ApiController]
-
 public class DeliveryRequestController : ControllerBase
 {
     private readonly IDeliveryRequestService _deliveryRequestService;
@@ -27,9 +26,11 @@ public class DeliveryRequestController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
+<<<<<<<<< Temporary merge branch 1
 
+=========
+>>>>>>>>> Temporary merge branch 2
     [Authorize]
-    [HttpPost]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
     {
         if (!ModelState.IsValid)
