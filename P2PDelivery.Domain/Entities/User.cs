@@ -33,6 +33,10 @@ public class User : IdentityUser<int>
 
     public bool IsDeleted { get; set; } = false;
 
+    public string RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
+
+
     /* Navigational properties */
     [NotMapped]
     public ICollection<DeliveryRequest> DeliveryRequests { get; set; } = new List<DeliveryRequest>();
