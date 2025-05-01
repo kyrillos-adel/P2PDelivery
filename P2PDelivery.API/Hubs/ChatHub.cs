@@ -1,13 +1,15 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using P2PDelivery.Application.DTOs.ChatDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 
 namespace P2PDelivery.API.Hubs;
 
+[Authorize]
 public class ChatHub : Hub
 {
     private readonly IChatService _chatService;
-    private static readonly Dictionary<string, string> userConnections = new();
     
     public ChatHub(IChatService chatService)
     {
@@ -19,7 +21,7 @@ public class ChatHub : Hub
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         if (!string.IsNullOrEmpty(userId))
-            userConnections[userId] = Context.ConnectionId;
+            Connection.UserConnections[userId] = Context.ConnectionId;
 
         return base.OnConnectedAsync();
     }
@@ -29,30 +31,31 @@ public class ChatHub : Hub
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         if (!string.IsNullOrEmpty(userId))
-            userConnections.Remove(userId);
+            Connection.UserConnections.Remove(userId);
 
         return base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessageToUser(string receiverId, string message/*, int deliveryRequestId*/)
+    public async Task SendMessageToUser(ChatMessageDto message, string deliveryRequestId)
     {
         // Get the sender's ID from the hub caller context
-        var senderId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         // Check if the senderId is a valid integer
         if (!int.TryParse(senderId, out var senderIdInt))
             return;
         
-        // Check if the receiverId is a valid integer
-        if (!int.TryParse(receiverId, out var receiverIdInt))
+        message.SenderId = senderIdInt;
+        
+        if (!int.TryParse(deliveryRequestId, out var deliveryRequestIdInt))
             return;
         
         // Save the message to the database
-        var response = await _chatService.SendMessage(message, senderIdInt, receiverIdInt, 1);
+        var response = await _chatService.SendMessage(message, deliveryRequestIdInt);
         if (response.IsSuccess)
         {
             // Notify the receiver
-            var connectionId = userConnections.FirstOrDefault(x => x.Key == receiverId.ToString()).Value;
+            var connectionId = Connection.UserConnections.FirstOrDefault(x => x.Key == response.Data.ReceiverId.ToString()).Value;
             if (!string.IsNullOrEmpty(connectionId))
             {
                 await Clients.Client(connectionId).SendAsync("ReceiveMessage", response.Data);

@@ -1,4 +1,6 @@
-﻿namespace P2PDelivery.Application.DTOs.ChatDTOs;
+﻿using System.Text.Json.Serialization;
+
+namespace P2PDelivery.Application.DTOs.ChatDTOs;
 
 public class ChatMessageDto
 {
@@ -16,5 +18,6 @@ public class ChatMessageDto
     
     public int ChatId { get; set; } 
     
-    // public ChatDto? Chat { get; set; }
+    [JsonIgnore]
+    public ChatDto? Chat { get; set; }
 }

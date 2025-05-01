@@ -24,33 +24,37 @@ public class ChatService : IChatService
         _chatMessageRepository = chatMessageRepository;
     }
     
-    public async Task<RequestResponse<ChatMessageDto>> SendMessage(string message, int senderId, int receiverId, int deliveryRequestId)
+    public async Task<RequestResponse<ChatMessageDto>> SendMessage(ChatMessageDto message, int deliveryRequestId)
     {
-        var chat = _chatRepository.GetAll(c => ((c.UserAId == senderId && c.UserBId == receiverId) || 
-                                                (c.UserAId == receiverId && c.UserBId == senderId)) && 
-                                               c.DeliveryRequestId == deliveryRequestId)
-            .FirstOrDefault();
+        Chat chat;
         
-        if (chat == null)
+        if (message.ChatId == 0 && message.SenderId != 0 && message.ReceiverId != 0)
         {
             chat = new Chat()
             {
                 DeliveryRequestId = deliveryRequestId,
-                UserAId = senderId,
-                UserBId = receiverId
+                UserAId = message.SenderId,
+                UserBId = message.ReceiverId
             };
             await _chatRepository.AddAsync(chat);
             await _chatRepository.SaveChangesAsync();
+            
+            message.ChatId = chat.Id;
+        }
+        else
+        {
+            chat = await _chatRepository.GetByIDAsync(message.ChatId);
+            if (chat == null)
+                return RequestResponse<ChatMessageDto>.Failure(ErrorCode.ChatNotFound, "Chat not found");
         }
         
-        var chatMessage = new ChatMessage()
-        {
-            Message = message,
-            SenderId = senderId,
-            ReceiverId = receiverId,
-            ChatId = chat.Id,
-            IsReceived = false
-        };
+        var chatMessage = new ChatMessage();
+        
+        _mapper.Map<ChatMessageDto, ChatMessage>(message, chatMessage);
+        
+        chatMessage.ReceiverId = chat.UserAId == message.SenderId ? chat.UserBId : chat.UserAId;
+        
+        chatMessage.ChatId = chat.Id;
         
         await _chatMessageRepository.AddAsync(chatMessage);
         await _chatMessageRepository.SaveChangesAsync();

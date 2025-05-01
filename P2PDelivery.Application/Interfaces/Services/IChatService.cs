@@ -5,7 +5,7 @@ namespace P2PDelivery.Application.Interfaces.Services;
 
 public interface IChatService
 {
-    Task<RequestResponse<ChatMessageDto>> SendMessage(string message, int senderId, int receiverId, int deliveryRequestId);
+    Task<RequestResponse<ChatMessageDto>> SendMessage(ChatMessageDto message, int deliveryRequestId);
     Task<RequestResponse<ChatDto>> GetChatById(int chatId, int userId);
     Task<RequestResponse<ICollection<ChatDto>>> GetChatsByUserId(int userId);
 }
