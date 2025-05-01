@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace P2PDelivery.API.Controllers
 {
     [Route("api/[controller]")]
-  //  [Authorize]
+    [Authorize]
     [ApiController]
     public class DRApplicationController : ControllerBase
     {
@@ -56,6 +56,25 @@ namespace P2PDelivery.API.Controllers
             else
             {
                 var respond = await _applicationService.UpdateApplication(id, updateApplicatioDTO);
+                if (respond.IsSuccess)
+                    return Ok(respond);
+                return BadRequest(respond);
+            }
+
+        }
+        [Authorize]
+        [HttpDelete("Delete/{id}")]
+        public async Task<ActionResult<RequestResponse<bool>>> DeleteApplication( int id)
+        {
+            var userID = GetUserIdFromToken();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            else
+            {
+                var respond = await _applicationService.DeleteApplicationAsync(id, userID);
                 if (respond.IsSuccess)
                     return Ok(respond);
                 return BadRequest(respond);

@@ -9,4 +9,6 @@ public interface IApplicationService
     Task<RequestResponse<ICollection<DRApplicationDTO>>> GetMyApplicationsAsync(int userID);
     Task<RequestResponse<string>> UpdateApplication(int id, UpdateApplicatioDTO updateApplicatioDTO);
     Task<RequestResponse<bool>> AddApplicationAsync(AddApplicationDTO addApplicationDTO, int userID);
+    Task<RequestResponse<bool>> DeleteApplicationAsync(int id , int userid);
+
 }

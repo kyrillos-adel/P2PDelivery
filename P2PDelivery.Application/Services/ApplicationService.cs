@@ -105,4 +105,20 @@ public class ApplicationService : IApplicationService
         return RequestResponse<bool>.Success(true);
 
     }
+
+    public async Task<RequestResponse<bool>> DeleteApplicationAsync(int id,int userid)
+    {
+        var application = await _applicationRepository.GetByIDAsync(id);
+        if (application == null)
+            return RequestResponse<bool>.Failure(ErrorCode.ApplicationNotExist, "Application not exist");
+        else
+        {
+            application.DeletedAt = DateTime.Now;
+            application.IsDeleted = true;
+            application.DeletedBy = userid;
+            await _applicationRepository.SaveChangesAsync();
+            return RequestResponse<bool>.Success(true);
+        }
+
+    }
 }
