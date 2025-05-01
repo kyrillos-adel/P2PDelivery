@@ -17,5 +17,7 @@ public interface IAuthService
     Task<RequestResponse<string>> EditUserInfo(string UserName, UserProfile userProfile);
     Task<RequestResponse<string>> RecoverMyAccount( string username);
 
+    Task<RequestResponse<LoginResponseDTO>> RefreshTokenAsync(string refreshToken);
+
 
 }

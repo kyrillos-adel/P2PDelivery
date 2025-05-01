@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 
 
 namespace P2PDelivery.Application.Services
@@ -50,6 +51,15 @@ namespace P2PDelivery.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
+        }
 
     }
 }

@@ -29,6 +29,7 @@
         UpdateFailed = 212,
         CanNotRecover = 213,
         Userexist = 214,
+        InvalidRefreshToken = 215,
         // DeliveryRequest Errors
         DeliveryRequestNotExist = 300,
         DeliveryRequestAlreadyExist = 301,
