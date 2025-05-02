@@ -148,7 +148,7 @@ namespace P2PDelivery.Application.Services
             if (deliveryRequestDTO.UserId == userID)
             {
                 var response = _mapper.ProjectTo<ApplicationDTO>(_requestRepository.GetAll(x => x.Id == deliveryId)
-                            .SelectMany(x => x.Applications))
+                            .SelectMany(x => x.Applications.Where(a => !a.IsDeleted)))
                     .ToList();
                     
                 deliveryRequestDTO.ApplicationDTOs = response;
