@@ -49,6 +49,21 @@ public class NotificationController : ControllerBase
         return NotFound(response);
     }
     
+    [HttpPut("mark-as-read")]
+    public async Task<ActionResult<RequestResponse<bool>>> MarkAsRead(ICollection<int> ids)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+            return BadRequest(RequestResponse<bool>.Failure(ErrorCode.Unauthorized, "User ID not found in token."));
+
+        var response = await _notificationService.MarkAsReadAsync(ids, int.Parse(userId));
+        
+        if (response.IsSuccess)
+            return Ok(response);
+        
+        return NotFound(response);
+    }
+    
     // [HttpPost]
     // public async Task<ActionResult<RequestResponse<NotificationDto>>> CreateNotification([FromBody] NotificationDto notification)
     // {

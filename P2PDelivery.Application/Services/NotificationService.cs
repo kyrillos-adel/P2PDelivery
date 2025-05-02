@@ -57,9 +57,9 @@ public class NotificationService : INotificationService
     
     public Task<RequestResponse<ICollection<NotificationDto>>> GetAll(int? userId)
     {
-        var notifications = userId != null ? 
+        var notifications = (userId != null ? 
             _notificationRepository.GetAll(x => x.UserId == userId) 
-            : _notificationRepository.GetAll()
+            : _notificationRepository.GetAll())
                 .OrderByDescending(n => !n.IsRead)
                 .ThenByDescending(n => n.CreatedAt);
         
@@ -67,5 +67,29 @@ public class NotificationService : INotificationService
             return Task.FromResult(RequestResponse<ICollection<NotificationDto>>.Success(_mapper.Map<ICollection<NotificationDto>>(notifications), "Notifications found"));
         
         return Task.FromResult(RequestResponse<ICollection<NotificationDto>>.Failure(ErrorCode.NotificationNotFound, "No notifications found"));
+    }
+
+    public Task<RequestResponse<bool>> MarkAsReadAsync(ICollection<int> notificationIds, int userId)
+    {
+        if (notificationIds == null || !notificationIds.Any())
+            return Task.FromResult(RequestResponse<bool>.Failure(ErrorCode.NotificationNotFound, "No notification IDs provided"));
+
+        // Fetch notifications that are not read
+        var notifications = _notificationRepository
+            .GetAll(x => notificationIds.Contains(x.Id) && !x.IsRead && x.UserId == userId);
+
+        if (notifications == null)
+            return Task.FromResult(RequestResponse<bool>.Failure(ErrorCode.NotificationNotFound,
+                "No notifications found"));
+        
+        foreach (var notification in notifications)
+        {
+            notification.IsRead = true;
+        }
+            
+        _notificationRepository.SaveChangesAsync();
+            
+        return Task.FromResult(RequestResponse<bool>.Success(true, 
+            "Notifications marked as read"));
     }
 }
