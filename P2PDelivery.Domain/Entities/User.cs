@@ -33,8 +33,12 @@ public class User : IdentityUser<int>
 
     public bool IsDeleted { get; set; } = false;
 
-    public string RefreshToken { get; set; }
-    public DateTime RefreshTokenExpiryTime { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    //image url
+    [MaxLength(300)]
+    public string? ProfileImageUrl { get; set; }
 
 
     /* Navigational properties */

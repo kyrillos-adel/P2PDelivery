@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,5 +16,8 @@ namespace P2PDelivery.Application.DTOs
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? NatId { get; set; }     
+        public string? ProfileImageUrl { get; set; }
+        public IFormFile? ProfileImage { get; set; }
+
     }
 }
