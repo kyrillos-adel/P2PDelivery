@@ -26,18 +26,25 @@ public class ChatService : IChatService
     
     public async Task<RequestResponse<ChatMessageDto>> SendMessage(ChatMessageDto message, int deliveryRequestId)
     {
-        Chat chat;
+        Chat? chat;
         
         if (message.ChatId == 0 && message.SenderId != 0 && message.ReceiverId != 0)
         {
-            chat = new Chat()
+            chat = _chatRepository.GetAll(c => (c.UserAId == message.SenderId && c.UserBId == message.ReceiverId) ||
+                                               (c.UserBId == message.SenderId && c.UserAId == message.ReceiverId))
+                .FirstOrDefault();
+
+            if (chat == null)
             {
-                DeliveryRequestId = deliveryRequestId,
-                UserAId = message.SenderId,
-                UserBId = message.ReceiverId
-            };
-            await _chatRepository.AddAsync(chat);
-            await _chatRepository.SaveChangesAsync();
+                chat = new Chat()
+                {
+                    DeliveryRequestId = deliveryRequestId,
+                    UserAId = message.SenderId,
+                    UserBId = message.ReceiverId
+                };
+                await _chatRepository.AddAsync(chat);
+                await _chatRepository.SaveChangesAsync();
+            }
             
             message.ChatId = chat.Id;
         }
