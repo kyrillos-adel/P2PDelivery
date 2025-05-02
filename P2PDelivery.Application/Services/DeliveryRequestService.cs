@@ -83,8 +83,7 @@ namespace P2PDelivery.Application.Services
         }
         public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams)
         {
-            var requests = _requestRepository.GetAll();//.Include(r => r.User); 
-            //var entities = await query.ToListAsync();
+            var requests = _requestRepository.GetAll();
             if(deliveryRequestParams.Title != null)
             {
                 requests =  requests.Where(x => x.Title.Contains(deliveryRequestParams.Title));
@@ -110,24 +109,9 @@ namespace P2PDelivery.Application.Services
             {
                 requests = requests.Where(x => x.MinPrice > deliveryRequestParams.StartPrice);
             }
-            //requests = requests.Skip((deliveryRequestParams.PageNumber - 1) * deliveryRequestParams.PageSize).Take(deliveryRequestParams.PageSize);
 
             var result = _mapper.ProjectTo<DeliveryRequestDTO>(requests);
-
             var paginatedResult = await PageList<DeliveryRequestDTO>.CreateAsync(result, deliveryRequestParams.PageNumber, deliveryRequestParams.PageSize);
-
-
-
-
-
-
-            //if (result == null)
-            //{
-            //    return RequestResponse<List<DeliveryRequestDTO>>.Failure(ErrorCode.DeliveryRequestNotExist, "No delivery requests found.");
-            //}
-
-            //var dtos = _mapper.Map<List<DeliveryRequestDTO>>(entities);
-
 
             return RequestResponse<PageList<DeliveryRequestDTO>>.Success(paginatedResult);
         }
