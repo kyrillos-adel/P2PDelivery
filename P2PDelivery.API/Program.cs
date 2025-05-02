@@ -13,6 +13,7 @@ using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
+using P2PDelivery.API.Services.Notifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,7 +108,13 @@ builder.Services.AddSignalR()
     .AddHubOptions<ChatHub>(options =>
     {
         options.EnableDetailedErrors = true;
+    })
+    .AddHubOptions<NotificationHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
     });
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
 
 
 
@@ -183,5 +190,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/hub/chat");
+app.MapHub<NotificationHub>("/hub/notification");
 
 app.Run();

@@ -2,5 +2,5 @@
 
 public static class Connection
 {
-    public static readonly Dictionary<string, string> UserConnections = new();
+    public static Dictionary<string, string> UserConnections = new();
 }

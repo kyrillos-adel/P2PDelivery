@@ -54,6 +54,12 @@
 
 
         // Payment Errors
+        
+        
+        
+        // Notifications Errors
+        NotificationNotFound = 500,
+        NotificationCreationError = 501
 
     }
 }

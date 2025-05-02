@@ -14,5 +14,4 @@ public class Match : BaseEntity
     public double Price { get; set; }
     
     public DateTime Date { get; set; }
-
 }

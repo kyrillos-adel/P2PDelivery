@@ -15,6 +15,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>,int>
     public DbSet<Item> Items { get; set; }
     public DbSet<Match> Matches { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -91,6 +92,12 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>,int>
             .HasOne(cm => cm.Receiver)
             .WithMany()
             .HasForeignKey(cm => cm.ReceiverId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany(u => u.Notifications)
+            .HasForeignKey(n => n.UserId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }
