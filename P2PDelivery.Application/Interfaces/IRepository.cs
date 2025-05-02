@@ -7,6 +7,7 @@ namespace P2PDelivery.Application.Interfaces
     {
         // Retriving 
         IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> expression=null);
+        //IQueryable<TEntity> GetAll(Specification<TEntity> specification=null);
         Task<TEntity> GetByIDAsync(int id);
 
         // Add

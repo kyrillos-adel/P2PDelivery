@@ -7,6 +7,8 @@ using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
+using P2PDelivery.Domain.Helpers;
+using P2PDelivery.Domain;
 
 
 namespace P2PDelivery.Application.Services
@@ -79,18 +81,55 @@ namespace P2PDelivery.Application.Services
             var dto = _mapper.Map<DeliveryRequestDTO>(entity);
             return RequestResponse<DeliveryRequestDTO>.Success(dto, "Deleted Successfully");
         }
-        public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync()
+        public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams)
         {
-            var query = _requestRepository.GetAll().Include(r => r.User); 
-            var entities = await query.ToListAsync();
-
-            if (entities == null || !entities.Any())
+            var requests = _requestRepository.GetAll();//.Include(r => r.User); 
+            //var entities = await query.ToListAsync();
+            if(deliveryRequestParams.Title != null)
             {
-                return RequestResponse<List<DeliveryRequestDTO>>.Failure(ErrorCode.DeliveryRequestNotExist, "No delivery requests found.");
+                requests =  requests.Where(x => x.Title.Contains(deliveryRequestParams.Title));
             }
+            
+            if(deliveryRequestParams.Status.Count > 0 )
+            {
+                requests = requests.Where(x => deliveryRequestParams.Status.Contains(x.Status));
+            }
+            if(deliveryRequestParams.PickUpLocation  != null)
+            {
+                requests = requests.Where(x => x.PickUpLocation.Contains(deliveryRequestParams.PickUpLocation));
+            }
+            if (deliveryRequestParams.DropOffLocation != null)
+            {
+                requests = requests.Where(x => x.DropOffLocation.Contains(deliveryRequestParams.DropOffLocation));
+            }
+            if (deliveryRequestParams.StartPickUpDate != null)
+            {
+                requests = requests.Where(x => x.PickUpDate > deliveryRequestParams.StartPickUpDate);
+            }
+            if (deliveryRequestParams.StartPrice > 0)
+            {
+                requests = requests.Where(x => x.MinPrice > deliveryRequestParams.StartPrice);
+            }
+            //requests = requests.Skip((deliveryRequestParams.PageNumber - 1) * deliveryRequestParams.PageSize).Take(deliveryRequestParams.PageSize);
 
-            var dtos = _mapper.Map<List<DeliveryRequestDTO>>(entities);
-            return RequestResponse<List<DeliveryRequestDTO>>.Success(dtos);
+            var result = _mapper.ProjectTo<DeliveryRequestDTO>(requests);
+
+            var paginatedResult = await PageList<DeliveryRequestDTO>.CreateAsync(result, deliveryRequestParams.PageNumber, deliveryRequestParams.PageSize);
+
+
+
+
+
+
+            //if (result == null)
+            //{
+            //    return RequestResponse<List<DeliveryRequestDTO>>.Failure(ErrorCode.DeliveryRequestNotExist, "No delivery requests found.");
+            //}
+
+            //var dtos = _mapper.Map<List<DeliveryRequestDTO>>(entities);
+
+
+            return RequestResponse<PageList<DeliveryRequestDTO>>.Success(paginatedResult);
         }
 
 

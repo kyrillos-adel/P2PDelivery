@@ -2,6 +2,8 @@ using P2PDelivery.Domain.Entities;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Application.DTOs.DeliveryRequestDTOs;
+using P2PDelivery.Domain.Helpers;
+using P2PDelivery.Domain;
 
 
 namespace P2PDelivery.Application.Interfaces.Services
@@ -10,7 +12,7 @@ namespace P2PDelivery.Application.Interfaces.Services
     {
         Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto);
         Task<RequestResponse<DeliveryRequestDTO>> GetDeliveryRequestByIdAsync(int id);
-        Task<RequestResponse<List<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync();
+        Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams);
         Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId);
         Task<RequestResponse<DeliveryRequestDTO>>DeleteDeliveryRequestAsync(int id);
 
