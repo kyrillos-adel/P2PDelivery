@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
+using P2PDelivery.Domain.Enums;
 using System.Security.Claims;
 
 namespace P2PDelivery.API.Controllers
@@ -44,7 +46,7 @@ namespace P2PDelivery.API.Controllers
             return Ok(result);
         }
         [HttpPut("update")]
-        public async  Task<ActionResult<RequestResponse<string>>> UpdateApplication(int id ,[FromBody]UpdateApplicatioDTO updateApplicatioDTO)
+        public async  Task<ActionResult<RequestResponse<string>>> UpdateApplication(int id ,UpdateApplicatioDTO updateApplicatioDTO)
         {
 
            
@@ -107,6 +109,23 @@ namespace P2PDelivery.API.Controllers
 
             var response = await _applicationService.GetApplicationByRequestAsync(requestID,userID);
             if(response.ErrorCode == ErrorCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        [HttpPut("updatestatus")]
+        public async Task <ActionResult<RequestResponse<bool>>> UpdateStatus ([FromBody] ApplicationStatusDTO request)
+        {
+            var userID = GetUserIdFromToken();
+            
+            var response = await _applicationService.UpdateApplicationStatuseAsync(request.Id, request.Status,userID);
+            if (response.ErrorCode == ErrorCode.Unauthorized)
             {
                 return Unauthorized(response);
             }

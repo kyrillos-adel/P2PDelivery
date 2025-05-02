@@ -106,5 +106,16 @@ namespace P2PDelivery.API.Controllers
             }
         }
 
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<RequestResponse<string>>> RefreshToken([FromBody] string refreshToken)
+        {
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
+
     }
 }

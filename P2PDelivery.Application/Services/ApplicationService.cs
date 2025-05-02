@@ -5,6 +5,7 @@ using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
+using P2PDelivery.Domain.Enums;
 
 namespace P2PDelivery.Application.Services;
 
@@ -77,12 +78,10 @@ public class ApplicationService : IApplicationService
             return RequestResponse<string>.Failure(ErrorCode.ApplicationNotExist, "Application not exist");
         else
         {
+
             application.OfferedPrice = updateApplicatioDTO.OfferedPrice;
             application.UpdatedAt = DateTime.Now;
-            var username = _authService.respond.UserName;
-            var user = await _userManager.FindByNameAsync(username);
-            var userid = user.Id;
-            application.UpdatedBy = userid;
+            application.UpdatedBy = application.UserId;
             await _applicationRepository.SaveChangesAsync();
             return RequestResponse<string>.Success("Updated done");
         }
@@ -116,6 +115,21 @@ public class ApplicationService : IApplicationService
             application.DeletedAt = DateTime.Now;
             application.IsDeleted = true;
             application.DeletedBy = userid;
+            await _applicationRepository.SaveChangesAsync();
+            return RequestResponse<bool>.Success(true);
+        }
+
+    }
+    public async Task<RequestResponse<bool>> UpdateApplicationStatuseAsync(int id, ApplicationStatus status,int userid)
+    {
+        var application = await _applicationRepository.GetByIDAsync(id);
+        if (application == null)
+            return RequestResponse<bool>.Failure(ErrorCode.ApplicationNotExist, "Application not exist");
+        else
+        {
+            application.UpdatedAt = DateTime.Now;
+            application.UpdatedBy = userid;
+            application.ApplicationStatus = status;
             await _applicationRepository.SaveChangesAsync();
             return RequestResponse<bool>.Success(true);
         }

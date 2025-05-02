@@ -63,10 +63,6 @@ namespace P2PDelivery.Application.Services
             return RequestResponse<List<DeliveryRequestDTO>>.Success(dtos);
         }
 
-
-
-
-        //Delete Delivery Request
         public async Task<RequestResponse<DeliveryRequestDTO>> DeleteDeliveryRequestAsync(int id)
         {
             var entity = await _requestRepository.GetByIDAsync(id);

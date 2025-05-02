@@ -148,7 +148,7 @@ builder.Services.AddAuthentication(options =>
                 // If the request is for our hub...
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/chathub"))
+                    path.StartsWithSegments("/hub/chat"))
                 {
                     context.Token = accessToken;
                 }

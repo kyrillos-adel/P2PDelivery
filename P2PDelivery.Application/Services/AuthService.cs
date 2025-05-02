@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Identity;﻿
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
+
 
 namespace P2PDelivery.Application.Services
 {
@@ -98,7 +100,16 @@ namespace P2PDelivery.Application.Services
                 return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.IncorrectPassword, "Wrong password");
             // Generate JWT token
             var token = await _jwtTokenGenerator.GenerateToken(user);
+            // Generate refresh token
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+
+            //get user roles
             var roles = await _userManager.GetRolesAsync(user);
+
+            // Save the RefreshToken into user data (optional but highly recommended)
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7); // Adjust the expiry as needed
+            await _userManager.UpdateAsync(user);
 
             _respond = new LoginResponseDTO
             {
@@ -106,7 +117,9 @@ namespace P2PDelivery.Application.Services
                 Expiration = DateTime.Now.AddHours(1),
                 UserName = user.UserName,
                 Email = user.Email,
-                Role = roles.ToList()
+                Role = roles.ToList(),
+                RefreshToken = refreshToken,
+                RefreshTokenExpiration = DateTime.Now.AddDays(7) // Adjust the expiry as needed
             };
 
             return RequestResponse<LoginResponseDTO>.Success(_respond, "Login successful.");
@@ -218,6 +231,41 @@ namespace P2PDelivery.Application.Services
 
             }
         }
+
+
+        public async Task<RequestResponse<LoginResponseDTO>> RefreshTokenAsync(string refreshToken)
+        {
+            // Find the user who owns this refresh token
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.Now)
+            {
+                return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.InvalidRefreshToken, "Invalid or expired refresh token.");
+            }
+
+            var newToken = await _jwtTokenGenerator.GenerateToken(user);
+            var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var response = new LoginResponseDTO
+            {
+                Token = newToken,
+                Expiration = DateTime.Now.AddHours(1),
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = roles.ToList(),
+                RefreshToken = newRefreshToken,
+                RefreshTokenExpiration = DateTime.Now.AddDays(7)
+            };
+
+            return RequestResponse<LoginResponseDTO>.Success(response, "Token refreshed successfully.");
+        }
+
     }
-    
+
 }
