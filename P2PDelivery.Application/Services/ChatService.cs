@@ -89,7 +89,26 @@ public class ChatService : IChatService
     {
         var chats = _chatRepository.GetAll(c => c.UserAId == userId || c.UserBId == userId)
             .Include(chat => chat.Messages)
-            .ToList();
+            .Select(chatDto => new ChatDto
+            {
+                Id = chatDto.Id,
+                DeliveryRequestId = chatDto.DeliveryRequestId,
+                UserAId = chatDto.UserAId,
+                UserBId = chatDto.UserBId,
+                ChattingWith = userId == chatDto.UserAId ? chatDto.UserB.FullName : chatDto.UserA.FullName,
+                Messages = chatDto.Messages.Select(m => new ChatMessageDto
+                {
+                    Id = m.Id,
+                    SenderId = m.SenderId,
+                    ReceiverId = m.ReceiverId,
+                    Message = m.Message,
+                    Date = m.Date,
+                    IsReceived = m.IsReceived,
+                    ChatId = m.ChatId
+                }).ToList()
+            }).ToList();
+        
+        
         
         if (chats == null || !chats.Any())
             return RequestResponse<ICollection<ChatDto>>.Failure(ErrorCode.ChatNotFound, "This user has no chats");
