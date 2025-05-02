@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 
@@ -25,6 +26,8 @@ public class CreateDeliveryRequestDTO
 
     [DataType(DataType.Currency)]
     public double MaxPrice { get; set; }
+
+    public IFormFile? DRImage { get; set; } // Image for the delivery request
     [JsonIgnore]
     public int UserId { get; set; } // Get this from token in production
 

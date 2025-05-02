@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using P2PDelivery.Application.DTOs;
@@ -7,6 +8,8 @@ using P2PDelivery.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 
+
+
 namespace P2PDelivery.Application.Services
 {
     public class AuthService : IAuthService
@@ -14,8 +17,11 @@ namespace P2PDelivery.Application.Services
         private readonly UserManager<User> _userManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
+        
         LoginResponseDTO _respond;
         public LoginResponseDTO respond => _respond;
+         
+
 
         public AuthService(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IJwtTokenGenerator jwtTokenGenerator)
         {
@@ -24,63 +30,65 @@ namespace P2PDelivery.Application.Services
             _roleManager = roleManager;
         }
 
-        
 
-        public async Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO )
+
+        public async Task<RequestResponse<RegisterDTO>> RegisterAsync(RegisterDTO registerDTO)
         {
-            
-            IdentityResult result = null;
-            var usersinded = _userManager.FindByNameAsync(registerDTO.UserName);
-            if (usersinded.Result == null)
+            var existingUser = await _userManager.FindByNameAsync(registerDTO.UserName);
+            if (existingUser != null)
             {
-                  var user = new User
-                 {
-                    UserName = registerDTO.UserName,
-                    FullName = registerDTO.FullName,
-                    Email = registerDTO.Email,
-                    Address = registerDTO.Address,
-                    NatId = registerDTO.NatId,
-                    PhoneNumber = registerDTO.Phone,
-                    CreatedAt = DateTime.Now
-                 };
-               
-
-                result = await _userManager.CreateAsync(user, registerDTO.Password);
-                if (result.Succeeded)
-                {
-                    return RequestResponse<RegisterDTO>.Success(registerDTO, "User registered successfully.");
-                }
-                else  
-                { var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
-                    return RequestResponse<RegisterDTO>.Failure(ErrorCode.UnexpectedError, errorMessage);
-                }
+                return RequestResponse<RegisterDTO>.Failure(ErrorCode.Userexist, "User already exists.");
             }
-            else
+
+            string? imagePath = null;
+            if (registerDTO.ProfileImage != null)
             {
-                return RequestResponse<RegisterDTO>.Failure(ErrorCode.Userexist, "user is exist");
-
-
+                imagePath = await SaveProfileImageAsync(registerDTO.ProfileImage);
             }
+
+            var user = new User
+            {
+                UserName = registerDTO.UserName,
+                FullName = registerDTO.FullName,
+                Email = registerDTO.Email,
+                Address = registerDTO.Address,
+                NatId = registerDTO.NatId,
+                PhoneNumber = registerDTO.Phone,
+                CreatedAt = DateTime.Now,
+                ProfileImageUrl = imagePath
+            };
+
+            var result = await _userManager.CreateAsync(user, registerDTO.Password);
+            if (result.Succeeded)
+            {
+                return RequestResponse<RegisterDTO>.Success(registerDTO, "User registered successfully.");
+            }
+
+            var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            return RequestResponse<RegisterDTO>.Failure(ErrorCode.UnexpectedError, errorMessage);
         }
-        public async Task<RequestResponse<RegisterDTO>> GetByName(string username)
+
+        public async Task<RequestResponse<UserProfile>> GetByName(string username)
         {
             var founded = await _userManager.FindByNameAsync(username);
             if (founded == null)
-                return RequestResponse<RegisterDTO>.Failure(ErrorCode.UserNotFound, "user not exist: ");
+                return RequestResponse<UserProfile>.Failure(ErrorCode.UserNotFound, "user not exist: ");
            
             else
             {
-                var user = new RegisterDTO
+                var user = new UserProfile
                 {
                     UserName = founded.UserName,
                     FullName = founded.FullName ,
                     Address = founded.Address,
-                    Phone =founded.PhoneNumber
+                    Phone =founded.PhoneNumber,
+                    Email = founded.Email,
+                    ProfileImageUrl=founded.ProfileImageUrl
                 };
-                return RequestResponse<RegisterDTO>.Success(user, " exist.");
+                return RequestResponse<UserProfile>.Success(user, " exist.");
             }
         }
-        
+
         public async Task<RequestResponse<LoginResponseDTO>> LoginAsync(LoginDTO loginDto)
         {
             bool isEmail = new EmailAddressAttribute().IsValid(loginDto.Identifier);
@@ -98,12 +106,14 @@ namespace P2PDelivery.Application.Services
 
             if (!isPasswordValid)
                 return RequestResponse<LoginResponseDTO>.Failure(ErrorCode.IncorrectPassword, "Wrong password");
+
             // Generate JWT token
             var token = await _jwtTokenGenerator.GenerateToken(user);
+
             // Generate refresh token
             var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
-            //get user roles
+            // Get user roles
             var roles = await _userManager.GetRolesAsync(user);
 
             // Save the RefreshToken into user data (optional but highly recommended)
@@ -111,7 +121,8 @@ namespace P2PDelivery.Application.Services
             user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7); // Adjust the expiry as needed
             await _userManager.UpdateAsync(user);
 
-            _respond = new LoginResponseDTO
+            // Create the LoginResponseDTO
+            var response = new LoginResponseDTO
             {
                 Token = token,
                 Expiration = DateTime.Now.AddHours(1),
@@ -119,11 +130,13 @@ namespace P2PDelivery.Application.Services
                 Email = user.Email,
                 Role = roles.ToList(),
                 RefreshToken = refreshToken,
-                RefreshTokenExpiration = DateTime.Now.AddDays(7) // Adjust the expiry as needed
+                RefreshTokenExpiration = DateTime.Now.AddDays(7), // Adjust the expiry as needed
+                ProfileImageUrl = user.ProfileImageUrl  // Add the profile image URL here
             };
 
-            return RequestResponse<LoginResponseDTO>.Success(_respond, "Login successful.");
+            return RequestResponse<LoginResponseDTO>.Success(response, "Login successful.");
         }
+
 
 
         public async Task<RequestResponse<string>> DeleteUser(string UserName)
@@ -143,12 +156,11 @@ namespace P2PDelivery.Application.Services
         }
 
 
-        public async Task<RequestResponse<string>> EditUserInfo(string UserName, UserProfile userProfile)
+        public async Task<RequestResponse<string>> EditUserInfo(string UserName,  UserProfile userProfile)
         {
             var user = await _userManager.FindByNameAsync(UserName);
-
             if (user == null || user.IsDeleted)
-                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "user not found");
+                return RequestResponse<string>.Failure(ErrorCode.UserNotFound, "User not found");
 
             if (!string.IsNullOrWhiteSpace(userProfile.Email) && userProfile.Email != user.Email)
             {
@@ -158,6 +170,7 @@ namespace P2PDelivery.Application.Services
 
                 user.Email = userProfile.Email;
             }
+
             if (!string.IsNullOrWhiteSpace(userProfile.UserName) && userProfile.UserName != user.UserName)
             {
                 var userNameExists = await _userManager.FindByNameAsync(userProfile.UserName);
@@ -165,14 +178,10 @@ namespace P2PDelivery.Application.Services
                     return RequestResponse<string>.Failure(ErrorCode.Userexist, "Username is already taken.");
 
                 user.UserName = userProfile.UserName;
-
             }
 
             if (!string.IsNullOrWhiteSpace(userProfile.FullName))
                 user.FullName = userProfile.FullName;
-
-            if (!string.IsNullOrWhiteSpace(userProfile.Email))
-                user.Email = userProfile.Email;
 
             if (!string.IsNullOrWhiteSpace(userProfile.Phone))
                 user.PhoneNumber = userProfile.Phone;
@@ -181,13 +190,21 @@ namespace P2PDelivery.Application.Services
                 user.Address = userProfile.Address;
 
             user.UpdatedAt = DateTime.Now;
-            var editableUser = await _userManager.FindByNameAsync(userProfile.UserName);
-            if (editableUser != null)
-            {
-                user.UpdatedBy = editableUser.Id;
-            }
-            var result = await _userManager.UpdateAsync(user);
 
+            // Handle Profile Image upload
+            if (userProfile.ProfileImage != null)
+            {
+                var imagePath = await SaveProfileImageAsync(userProfile.ProfileImage);
+                user.ProfileImageUrl = imagePath;
+            }
+
+            var updatedByUser = await _userManager.FindByNameAsync(userProfile.UserName);
+            if (updatedByUser != null)
+            {
+                user.UpdatedBy = updatedByUser.Id;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -196,6 +213,8 @@ namespace P2PDelivery.Application.Services
 
             return RequestResponse<string>.Success("Profile updated successfully.");
         }
+
+
         public async Task<UserProfile> GetUserProfile(string userName)
         {
             var user = await _userManager.FindByNameAsync(userName);
@@ -210,7 +229,8 @@ namespace P2PDelivery.Application.Services
                 Email = user.Email,
                 Address = user.Address,
                 NatId = user.NatId,
-                Phone = user.PhoneNumber
+                Phone = user.PhoneNumber,
+               ProfileImageUrl=user.ProfileImageUrl
             };
         }
 
@@ -265,6 +285,42 @@ namespace P2PDelivery.Application.Services
 
             return RequestResponse<LoginResponseDTO>.Success(response, "Token refreshed successfully.");
         }
+        private async Task<string> SaveProfileImageAsync(IFormFile image)
+        {
+            // Validate image size (max 2MB)
+            if (image.Length > 2 * 1024 * 1024)
+            {
+                throw new Exception("File size exceeds the limit of 2MB.");
+            }
+
+            // Validate file type (only allow image formats)
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                throw new Exception("Invalid file type. Only images are allowed.");
+            }
+
+            var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "users");
+            Directory.CreateDirectory(folder);
+
+            var fileName = Guid.NewGuid().ToString() + fileExtension;
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            return $"/images/users/{fileName}";
+        }
+
+
+
+
+
+
 
     }
 

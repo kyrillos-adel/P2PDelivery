@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace P2PDelivery.Application.DTOs;
 
@@ -29,4 +30,6 @@ public class DeliveryRequestUpdateDto
     
     [Required]
     public double MaxPrice { get; set; }
+    public string? DRImageUrl { get; set; } // Image for the delivery request
+    public IFormFile? DRImage { get; set; } // Image for the delivery request
 }
