@@ -5,6 +5,8 @@ using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.Response;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using P2PDelivery.Domain.Helpers;
+using P2PDelivery.Domain;
 
 namespace P2PDelivery.API.Controllers;
 
@@ -88,9 +90,11 @@ public class DeliveryRequestController : ControllerBase
 
 
     [HttpGet]
-    public async Task<ActionResult<RequestResponse<List<DeliveryRequestDTO>>>> GetAllDeliveryRequests()
+
+    public async Task<ActionResult<RequestResponse<PageList<DeliveryRequestDTO>>>> GetAllDeliveryRequests([FromQuery] DeliveryRequestParams deliveryRequestParams, int pageNumber)
     {
-        var result = await _deliveryRequestService.GetAllDeliveryRequestsAsync();
+        deliveryRequestParams.PageNumber = pageNumber;
+        var result = await _deliveryRequestService.GetAllDeliveryRequestsAsync(deliveryRequestParams);
 
         if (!result.IsSuccess)
         {
