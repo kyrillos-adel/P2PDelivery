@@ -28,9 +28,8 @@ public class DeliveryRequestController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
-
-    [HttpPost]
     [Authorize]
+    [HttpPost]
     public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromForm] CreateDeliveryRequestDTO dto)
     {
         if (!ModelState.IsValid)

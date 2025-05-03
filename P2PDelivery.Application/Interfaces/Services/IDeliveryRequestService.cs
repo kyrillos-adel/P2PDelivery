@@ -20,5 +20,6 @@ namespace P2PDelivery.Application.Interfaces.Services
         Task<bool> IsDeliveryRequestExist(int deliveryId);
         Task<RequestResponse<DeliveryRequest>> UpdateAsync(int id, DeliveryRequestUpdateDto deliveryRequestUpdateDtodto);
         Task<RequestResponse<bool>> DeleteAsync(int id);
+        Task<bool> updatestatuse(int id ,int statuse);
     }
 }
