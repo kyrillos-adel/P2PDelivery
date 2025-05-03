@@ -65,7 +65,7 @@ namespace P2PDelivery.API.Controllers
         }
         [Authorize]
         [HttpPut("update")]
-        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromBody] UserProfile userProfile)
+        public async Task<ActionResult<RequestResponse<string>>> UpdateUser([FromForm] UserProfile userProfile)
         {
             var UserName = User.FindFirstValue(ClaimTypes.Name);
             var response = await _authService.EditUserInfo(UserName, userProfile);

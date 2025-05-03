@@ -1,0 +1,50 @@
+﻿name: Deploy Clean Arch API to MonsterHost
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+
+      - name: Install EF Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Add EF tools to PATH
+        run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Restore solution
+        run: dotnet restore P2PDelivery.sln
+
+      - name: Update Database with Custom Connection String
+        run: >
+          dotnet ef database update 
+          --project ./P2PDelivery.Infrastructure/P2PDelivery.Infrastructure.csproj 
+          --startup-project ./P2PDelivery.Api/P2PDelivery.Api.csproj 
+          --connection "${{ secrets.PUBLIC_DB }}"
+
+      - name: Build API Project
+        run: dotnet build ./P2PDelivery.Api/P2PDelivery.Api.csproj --configuration Release
+
+      - name: Publish API
+        run: dotnet publish ./P2PDelivery.Api/P2PDelivery.Api.csproj -c Release -o released
+
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: released/
+          server-dir: /wwwroot/

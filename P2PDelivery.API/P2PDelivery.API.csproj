@@ -9,19 +9,30 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
-          <PrivateAssets>all</PrivateAssets>
+		
+
+			<PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+        <PackageReference Include="SpecFlow" Version="3.9.74" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
-    </ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="9.0.0" />
+
+	    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\P2PDelivery.Application\P2PDelivery.Application.csproj" />
       <ProjectReference Include="..\P2PDelivery.Domain\P2PDelivery.Domain.csproj" />
       <ProjectReference Include="..\P2PDelivery.Infrastructure\P2PDelivery.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\images\deliveryRequest\" />
+      <Folder Include="wwwroot\images\users\" />
     </ItemGroup>
 
 </Project>

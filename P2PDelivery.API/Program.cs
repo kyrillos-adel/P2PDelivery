@@ -71,8 +71,9 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", cfg =>
     {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
         cfg
-            .WithOrigins("http://192.168.132.208:5500", "http://localhost:4200", "https://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -175,8 +176,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
+app.UseStaticFiles();
 app.UseCors("AllowAll");
+
+
 
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 
