@@ -38,7 +38,7 @@ jobs:
         run: dotnet build ./P2PDelivery.Api/P2PDelivery.Api.csproj --configuration Release
 
       - name: Publish API
-        run: dotnet publish ./P2PDelivery.Api/P2PDelivery.Api.csproj -c Release -o published
+        run: dotnet publish ./P2PDelivery.Api/P2PDelivery.Api.csproj -c Release -o released
 
       - name: Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -46,4 +46,4 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: published/
+          local-dir: released/
