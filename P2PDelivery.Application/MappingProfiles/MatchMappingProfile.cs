@@ -18,6 +18,7 @@ namespace P2PDelivery.Application.MappingProfiles
             CreateMap<MatchDTO, Match>()
 
                 .ForMember(dest => dest.ApplicationId, opt => opt.MapFrom(src => src.ApplicationId))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.DeliveryRequestId, opt => opt.MapFrom(src => src.DeliveryRequestId));
                
 
