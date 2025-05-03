@@ -196,6 +196,7 @@ namespace P2PDelivery.Application.Services
                     "Delivery request not found");
             
             _mapper.Map(deliveryRequestUpdateDto, deliveryRequest);
+            await _requestRepository.SaveChangesAsync();
 
             if (deliveryRequestUpdateDto.DRImage != null)
             {

@@ -121,7 +121,7 @@ public class DeliveryRequestController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromForm] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
     {
         var requestResponse = await _deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
         if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
