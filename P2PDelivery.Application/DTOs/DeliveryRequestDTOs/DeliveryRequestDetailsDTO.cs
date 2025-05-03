@@ -22,6 +22,7 @@ public class DeliveryRequestDetailsDTO
     public string UserName { get; set; }
     public string Status { get; set; }
     public string? DRImageUrl { get; set; }
+    public string? ProfileImageUrl { get; set; }
     public ICollection<ApplicationDTO>? ApplicationDTOs { get; set; } = new List<ApplicationDTO>();
 
 
