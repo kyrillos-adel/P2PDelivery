@@ -12,8 +12,8 @@ using P2PDelivery.Infrastructure.Contexts;
 namespace P2PDelivery.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250428194528_Add Refresh token")]
-    partial class AddRefreshtoken
+    [Migration("20250503201757_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -340,6 +340,9 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
+                    b.Property<string>("DRImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -550,6 +553,53 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.ToTable("Matches");
                 });
 
+            modelBuilder.Entity("P2PDelivery.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -685,11 +735,14 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
@@ -909,6 +962,17 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Navigation("DeliveryRequest");
                 });
 
+            modelBuilder.Entity("P2PDelivery.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("P2PDelivery.Domain.Entities.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("P2PDelivery.Domain.Entities.DeliveryRequest", "DeliveryRequest")
@@ -966,6 +1030,8 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Navigation("Chats");
 
                     b.Navigation("DeliveryRequests");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Payments");
                 });
