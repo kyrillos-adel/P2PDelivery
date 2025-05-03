@@ -59,7 +59,7 @@
         
         // Notifications Errors
         NotificationNotFound = 500,
-        NotificationCreationError = 501
-
+        NotificationCreationError = 501,
+        matchnotexist = 502
     }
 }

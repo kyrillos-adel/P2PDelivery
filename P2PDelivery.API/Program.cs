@@ -14,6 +14,7 @@ using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
 using P2PDelivery.API.Services.Notifications;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,8 +71,9 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", cfg =>
     {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
         cfg
-            .WithOrigins("http://192.168.132.208:5500", "http://localhost:4200", "https://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -83,7 +85,11 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         /*.UseLazyLoadingProxies()*/;
 });
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
@@ -105,6 +111,7 @@ builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
+builder.Services.AddScoped<ImatchService, MatchService>();
 builder.Services.AddSignalR()
     .AddHubOptions<ChatHub>(options =>
     {
