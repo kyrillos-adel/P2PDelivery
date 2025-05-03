@@ -83,7 +83,6 @@ builder.Services.AddCors(opt =>
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
         /*.UseLazyLoadingProxies()*/;
 });
 builder.Services.AddControllers()
