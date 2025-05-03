@@ -7,7 +7,7 @@ public class DeliveryRequestUpdate : BaseEntity
 {
     public DateTime Date { get; set; }
     
-    public DeliveryRequestStatus Status { get; set; } //     Pending, Accepted, Completed, Cancelled, Delivered
+    public TrackingStatus Status { get; set; } 
     
     /* The user who updated the status */
     public int UserId { get; set; } // Foreign key

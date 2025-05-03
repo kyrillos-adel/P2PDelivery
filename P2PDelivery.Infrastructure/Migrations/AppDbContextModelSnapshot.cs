@@ -208,7 +208,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("UserBId");
 
-                    b.ToTable("Chats");
+                    b.ToTable("Chats", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.ChatMessage", b =>
@@ -267,7 +267,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.DRApplication", b =>
@@ -320,7 +320,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Applications");
+                    b.ToTable("Applications", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.DeliveryRequest", b =>
@@ -395,7 +395,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DeliveryRequests");
+                    b.ToTable("DeliveryRequests", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.DeliveryRequestUpdate", b =>
@@ -445,7 +445,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DeliveryRequestUpdates");
+                    b.ToTable("DeliveryRequestUpdates", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Item", b =>
@@ -496,7 +496,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("DeliveryRequestId");
 
-                    b.ToTable("Items");
+                    b.ToTable("Items", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Match", b =>
@@ -547,54 +547,7 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.HasIndex("DeliveryRequestId")
                         .IsUnique();
 
-                    b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("P2PDelivery.Domain.Entities.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
+                    b.ToTable("Matches", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Payment", b =>
@@ -653,7 +606,7 @@ namespace P2PDelivery.Infrastructure.Migrations
 
                     b.HasIndex("PayerId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("P2PDelivery.Domain.Entities.User", b =>
@@ -959,17 +912,6 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Navigation("DeliveryRequest");
                 });
 
-            modelBuilder.Entity("P2PDelivery.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("P2PDelivery.Domain.Entities.User", "User")
-                        .WithMany("Notifications")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("P2PDelivery.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("P2PDelivery.Domain.Entities.DeliveryRequest", "DeliveryRequest")
@@ -1027,8 +969,6 @@ namespace P2PDelivery.Infrastructure.Migrations
                     b.Navigation("Chats");
 
                     b.Navigation("DeliveryRequests");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("Payments");
                 });
