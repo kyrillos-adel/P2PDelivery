@@ -72,7 +72,6 @@ namespace P2PDelivery.Application.Services
         public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId)
         {
             var query = _requestRepository.GetAll(x => x.UserId == userId).Include(x=>x.User);
-            //var query = _requestRepository.GetAll().Include(r => r.User);
             var entities = await query.ToListAsync();
 
             if (entities == null || !entities.Any())
@@ -98,9 +97,7 @@ namespace P2PDelivery.Application.Services
         }
         public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams, int UserID)
         {
-            var requests = _requestRepository.GetAll()
-                .Include(x=>x.User)
-                .AsQueryable();
+            var requests = _requestRepository.GetAll();
             if(deliveryRequestParams.Title != null)
             {
                 requests =  requests.Where(x => x.Title.Contains(deliveryRequestParams.Title));
