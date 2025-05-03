@@ -71,7 +71,7 @@ builder.Services.AddCors(opt =>
     opt.AddPolicy("AllowAll", cfg =>
     {
         cfg
-            .WithOrigins("http://192.168.132.208:5500", "http://localhost:4200", "https://localhost:4200")
+            .WithOrigins("https://kyrillos-adel.github.io/P2PDeliverySite", "http://localhost:4200", "https://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
