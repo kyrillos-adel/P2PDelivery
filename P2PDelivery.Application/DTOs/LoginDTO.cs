@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace P2PDelivery.Application.DTOs;
 
@@ -19,6 +20,7 @@ public class LoginResponseDTO
     public string UserName { get; set; }
     public string Email { get; set; }
     public List<string> Role { get; set; }
+    public string ProfileImageUrl { get; set; }
 
 
     public string RefreshToken { get; set; }  

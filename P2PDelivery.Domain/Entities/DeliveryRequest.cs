@@ -30,6 +30,7 @@ public class DeliveryRequest : BaseEntity
     
     public int UserId { get; set; } // Foreign key
     public User? User { get; set; }
+    public string? DRImageUrl { get; set; }
     
     
     /* Navigational properties */
