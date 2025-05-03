@@ -28,6 +28,8 @@ namespace P2PDelivery.Application.Services
         public async Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto)
         {
             var entity=_mapper.Map<DeliveryRequest>(dto);
+            entity.Status = DeliveryRequestStatus.Pending;
+
             // Handle image saving
             if (dto.DRImage != null && dto.DRImage.Length > 0)
             {

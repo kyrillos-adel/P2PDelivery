@@ -16,7 +16,9 @@ namespace P2PDelivery.Application.MappingProfiles
             CreateMap<AddApplicationDTO, DRApplication>();
 
             CreateMap<ApplicationDTO, DRApplication>().ReverseMap()
-                .ForMember( dst=> dst.UserName, opt=> opt.MapFrom(src=>src.User.FullName));
+                .ForMember( dst=> dst.UserName, opt=> opt.MapFrom(src=>src.User.FullName))
+                .ForMember( dst=> dst.UserProfileUrl, opt=> opt.MapFrom(src=>src.User.ProfileImageUrl))
+                ;
         }
     }
 }
