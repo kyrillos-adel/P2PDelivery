@@ -27,8 +27,12 @@ jobs:
       - name: Restore solution
         run: dotnet restore P2PDelivery.sln
 
-      - name: Apply EF Core Migrations
-        run: dotnet ef database update --project ./P2PDelivery.Infrastructure/P2PDelivery..Infrastructure.csproj --startup-project ./P2PDelivery.Api/P2PDelivery.Api.csproj
+      - name: Update Database with Custom Connection String
+        run: >
+          dotnet ef database update 
+          --project ./P2PDelivery.Infrastructure/P2PDelivery.Infrastructure.csproj 
+          --startup-project ./P2PDelivery.Api/P2PDelivery.Api.csproj 
+          --connection "${{ secrets.PUBLIC_DB }}"
 
       - name: Build API Project
         run: dotnet build ./P2PDelivery.Api/P2PDelivery.Api.csproj --configuration Release
