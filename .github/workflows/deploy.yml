@@ -48,4 +48,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: released/
           server-dir: /wwwroot/
-          dangerous-clean-slate: true
