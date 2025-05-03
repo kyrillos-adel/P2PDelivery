@@ -70,8 +70,9 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", cfg =>
     {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
         cfg
-            .WithOrigins("http://p2pdeliverysite.runasp.net", "http://localhost:4200", "https://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
