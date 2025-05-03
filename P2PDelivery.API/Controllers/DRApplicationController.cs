@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
+using P2PDelivery.Domain.Enums;
 using System.Security.Claims;
 
 namespace P2PDelivery.API.Controllers
 {
     [Route("api/[controller]")]
-  //  [Authorize]
+    [Authorize]
     [ApiController]
     public class DRApplicationController : ControllerBase
     {
@@ -44,7 +46,7 @@ namespace P2PDelivery.API.Controllers
             return Ok(result);
         }
         [HttpPut("update")]
-        public async  Task<ActionResult<RequestResponse<string>>> UpdateApplication(int id ,[FromBody]UpdateApplicatioDTO updateApplicatioDTO)
+        public async  Task<ActionResult<RequestResponse<string>>> UpdateApplication(int id ,UpdateApplicatioDTO updateApplicatioDTO)
         {
 
            
@@ -56,6 +58,25 @@ namespace P2PDelivery.API.Controllers
             else
             {
                 var respond = await _applicationService.UpdateApplication(id, updateApplicatioDTO);
+                if (respond.IsSuccess)
+                    return Ok(respond);
+                return BadRequest(respond);
+            }
+
+        }
+        [Authorize]
+        [HttpDelete("Delete/{id}")]
+        public async Task<ActionResult<RequestResponse<bool>>> DeleteApplication( int id)
+        {
+            var userID = GetUserIdFromToken();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            else
+            {
+                var respond = await _applicationService.DeleteApplicationAsync(id, userID);
                 if (respond.IsSuccess)
                     return Ok(respond);
                 return BadRequest(respond);
@@ -88,6 +109,23 @@ namespace P2PDelivery.API.Controllers
 
             var response = await _applicationService.GetApplicationByRequestAsync(requestID,userID);
             if(response.ErrorCode == ErrorCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        [HttpPut("updatestatus")]
+        public async Task <ActionResult<RequestResponse<bool>>> UpdateStatus (ApplicationStatusDTO request)
+        {
+            var userID = GetUserIdFromToken();
+            
+            var response = await _applicationService.UpdateApplicationStatuseAsync(request.deleveryRequestId, request.Id, request.Status,userID);
+            if (response.ErrorCode == ErrorCode.Unauthorized)
             {
                 return Unauthorized(response);
             }

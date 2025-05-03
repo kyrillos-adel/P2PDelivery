@@ -4,6 +4,7 @@ namespace P2PDelivery.Application.DTOs.ApplicationDTOs;
 
 public class ApplicationDTO
 {
+    public int Id { get; set; }
     public DateTime Date { get; set; }
     public double OfferedPrice { get; set; }
     public string ApplicationStatus { get; set; }
