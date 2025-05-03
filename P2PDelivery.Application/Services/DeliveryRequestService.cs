@@ -7,6 +7,7 @@ using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
 using P2PDelivery.Domain.Entities;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
+using P2PDelivery.Domain.Enums;
 
 
 namespace P2PDelivery.Application.Services
@@ -167,6 +168,21 @@ namespace P2PDelivery.Application.Services
             _requestRepository.SaveChangesAsync();
 
             return RequestResponse<bool>.Success(true, "Successfully deleted delivery request");
+        }
+
+        public async Task<bool> updatestatuse(int id ,int statuse)
+        {
+          var respond=  await _requestRepository.GetByIDAsync(id);
+            if (respond == null)
+                return false;
+            else
+            {
+                respond.Status = (DeliveryRequestStatus)statuse;
+                _requestRepository.SaveChangesAsync();
+                return true;
+            }
+               
+
         }
     }
 }

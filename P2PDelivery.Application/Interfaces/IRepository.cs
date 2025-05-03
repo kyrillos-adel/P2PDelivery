@@ -28,5 +28,6 @@ namespace P2PDelivery.Application.Interfaces
 
         // SaveChanges
         Task SaveChangesAsync();
+        Task DeleteAsync(TEntity entity);
     }
 }

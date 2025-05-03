@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using P2PDelivery.Application.DTOs.ApplicationDTOs;
+using P2PDelivery.Application.DTOs.MatchDTO;
+using P2PDelivery.Application.DTOs.Notifications;
 using P2PDelivery.Application.Interfaces;
 using P2PDelivery.Application.Interfaces.Services;
 using P2PDelivery.Application.Response;
@@ -12,18 +14,26 @@ namespace P2PDelivery.Application.Services;
 public class ApplicationService : IApplicationService
 {
     private readonly IRepository<DRApplication> _applicationRepository;
+    private readonly IRepository<Match> _matchrepository;
+    private readonly INotificationService _notificationService;
     private readonly IAuthService _authService;
     private readonly UserManager<User> _userManager;
     private readonly IMapper _mapper;
     private readonly IDeliveryRequestService _deliveryRequestService;
+    private readonly ImatchService _matchService;
+
     public ApplicationService(IRepository<DRApplication> applicationRepository,IAuthService authService,
-                            UserManager<User> userManager, IMapper mapper, IDeliveryRequestService deliveryRequestService)
+                            UserManager<User> userManager, IMapper mapper, IDeliveryRequestService deliveryRequestService,
+                            ImatchService matchservice, IRepository<Match> matchrepository, INotificationService notificationService)
     {
         _applicationRepository = applicationRepository;
         _authService = authService;
         _userManager = userManager;
         _mapper = mapper;
         _deliveryRequestService = deliveryRequestService;
+        _matchService = matchservice;
+        _matchrepository = matchrepository;
+        _notificationService = notificationService;
     }
 
     public UserManager<User> UserManager { get; }
@@ -70,7 +80,6 @@ public class ApplicationService : IApplicationService
             }).ToList();
         return RequestResponse<ICollection<DRApplicationDTO>>.Success(applications);
     }
-
     public async Task<RequestResponse<string>> UpdateApplication(int id ,UpdateApplicatioDTO updateApplicatioDTO)
     {
        var application = await _applicationRepository.GetByIDAsync(id);
@@ -85,11 +94,11 @@ public class ApplicationService : IApplicationService
             await _applicationRepository.SaveChangesAsync();
             return RequestResponse<string>.Success("Updated done");
         }
-
     }
-
     public async Task<RequestResponse<bool>> AddApplicationAsync(AddApplicationDTO addApplicationDTO, int userID)
     {
+
+        var requester = await _deliveryRequestService.GetDeliveryRequestByIdAsync(addApplicationDTO.DeliveryRequestId);
         var isRequestExist = await _deliveryRequestService.IsDeliveryRequestExist(addApplicationDTO.DeliveryRequestId);
         if (!isRequestExist)
         {
@@ -100,11 +109,14 @@ public class ApplicationService : IApplicationService
         application.Date = DateTime.Now;
         await _applicationRepository.AddAsync(application);
         await _applicationRepository.SaveChangesAsync();
-
+        await _notificationService.CreateAsync(new NotificationDto
+        {
+            UserId = requester.Data.UserId,
+            Message = $" {requester.Data.Title} has a new application",
+        });
         return RequestResponse<bool>.Success(true);
 
     }
-
     public async Task<RequestResponse<bool>> DeleteApplicationAsync(int id,int userid)
     {
         var application = await _applicationRepository.GetByIDAsync(id);
@@ -118,21 +130,51 @@ public class ApplicationService : IApplicationService
             await _applicationRepository.SaveChangesAsync();
             return RequestResponse<bool>.Success(true);
         }
-
     }
-    public async Task<RequestResponse<bool>> UpdateApplicationStatuseAsync(int id, ApplicationStatus status,int userid)
+    public async Task<RequestResponse<bool>> UpdateApplicationStatuseAsync(int deId,int id ,int status,int userid)
     {
+        var ismatch = _matchService.GetByDelivery(deId);
         var application = await _applicationRepository.GetByIDAsync(id);
         if (application == null)
             return RequestResponse<bool>.Failure(ErrorCode.ApplicationNotExist, "Application not exist");
-        else
+
+        else if (status == 1 && ismatch.Result == null)
         {
+            MatchDTO matchDTO = new MatchDTO
+            {
+                ApplicationId = id,
+                DeliveryRequestId = deId
+            };
+            var match = await _matchService.Addmatch(matchDTO);
             application.UpdatedAt = DateTime.Now;
             application.UpdatedBy = userid;
-            application.ApplicationStatus = status;
+            application.ApplicationStatus = (ApplicationStatus)status;
             await _applicationRepository.SaveChangesAsync();
+
+            await _deliveryRequestService.updatestatuse(deId, 1);
+            await _notificationService.CreateAsync(new NotificationDto
+            {
+                UserId = application.UserId,
+                Message = $"Your application for delivary has been accepted.",
+            });
             return RequestResponse<bool>.Success(true);
         }
-
+        else if (status == 2 && ismatch.Result != null) 
+        {
+            await _matchService.deletematch(ismatch.Result.Id);
+            application.UpdatedAt = DateTime.Now;
+            application.UpdatedBy = userid;
+            application.ApplicationStatus = (ApplicationStatus)status;
+            await _applicationRepository.SaveChangesAsync();
+            
+            await _deliveryRequestService.updatestatuse(deId, 0);
+            await _notificationService.CreateAsync(new NotificationDto
+            {
+                UserId = application.UserId,
+                Message = $"Your application for delivary #{application.DeliveryRequest.Title} has been rejected.",
+            });
+            return RequestResponse<bool>.Success(true);
+        }
+        return RequestResponse<bool>.Success(true);
     }
 }

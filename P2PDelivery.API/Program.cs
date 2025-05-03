@@ -13,6 +13,8 @@ using P2PDelivery.Domain.Entities;
 using P2PDelivery.Infrastructure;
 using P2PDelivery.Infrastructure.Configurations;
 using P2PDelivery.Infrastructure.Contexts;
+using P2PDelivery.API.Services.Notifications;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,7 +84,11 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         /*.UseLazyLoadingProxies()*/;
 });
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
@@ -103,11 +109,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<ImatchService, MatchService>();
 builder.Services.AddSignalR()
     .AddHubOptions<ChatHub>(options =>
     {
         options.EnableDetailedErrors = true;
+    })
+    .AddHubOptions<NotificationHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
     });
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
 
 
 
@@ -183,5 +196,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/hub/chat");
+app.MapHub<NotificationHub>("/hub/notification");
 
 app.Run();

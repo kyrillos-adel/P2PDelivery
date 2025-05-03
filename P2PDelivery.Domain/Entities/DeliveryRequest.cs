@@ -44,4 +44,6 @@ public class DeliveryRequest : BaseEntity
     public Match Match { get; set; } // One-to-one relationship with Match
 
     public Chat Chat { get; set; } // One-to-one relationship with Chat
+
+   
 }

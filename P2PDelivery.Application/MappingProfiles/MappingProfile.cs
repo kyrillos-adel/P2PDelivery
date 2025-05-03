@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using P2PDelivery.Application.DTOs;
 using P2PDelivery.Application.DTOs.ChatDTOs;
+using P2PDelivery.Application.DTOs.Notifications;
 using P2PDelivery.Domain.Entities;
 
 namespace P2PDelivery.Application.MappingProfiles;
@@ -19,6 +20,10 @@ public class MappingProfile : Profile
 
         CreateMap<ChatMessage, ChatMessageDto>()
             // .ForMember()
+            .ReverseMap();
+        
+        CreateMap<Notification, NotificationDto>()
+            // .ForMember(n => n.IsRead, opt => opt.MapFrom(n => n.IsRead))
             .ReverseMap();
     }
 }

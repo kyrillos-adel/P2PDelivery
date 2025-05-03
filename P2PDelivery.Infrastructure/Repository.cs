@@ -109,5 +109,11 @@ namespace P2PDelivery.Infrastructure
                 }
             }
         }
+
+        public  Task DeleteAsync(TEntity entity)
+        {
+            _dbSet.Remove(entity);
+            return Task.CompletedTask;
+        }
     }
 }

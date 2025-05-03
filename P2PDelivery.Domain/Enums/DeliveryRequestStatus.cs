@@ -2,5 +2,8 @@
 
 public enum DeliveryRequestStatus
 {
-    Pending, Accepted, Completed, Cancelled, Delivered
+    Pending, 
+    Completed,
+    Cancelled,
+    Delivered
 }

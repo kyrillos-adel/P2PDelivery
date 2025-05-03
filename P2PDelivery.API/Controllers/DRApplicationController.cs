@@ -120,11 +120,11 @@ namespace P2PDelivery.API.Controllers
             return Ok(response);
         }
         [HttpPut("updatestatus")]
-        public async Task <ActionResult<RequestResponse<bool>>> UpdateStatus ([FromBody] ApplicationStatusDTO request)
+        public async Task <ActionResult<RequestResponse<bool>>> UpdateStatus (ApplicationStatusDTO request)
         {
             var userID = GetUserIdFromToken();
             
-            var response = await _applicationService.UpdateApplicationStatuseAsync(request.Id, request.Status,userID);
+            var response = await _applicationService.UpdateApplicationStatuseAsync(request.deleveryRequestId, request.Id, request.Status,userID);
             if (response.ErrorCode == ErrorCode.Unauthorized)
             {
                 return Unauthorized(response);

@@ -52,4 +52,7 @@ public class User : IdentityUser<int>
 
     [NotMapped]
     public ICollection<Chat> Chats { get; set; } = new List<Chat>();
+    
+    [NotMapped]
+    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
