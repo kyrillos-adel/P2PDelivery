@@ -96,7 +96,7 @@ namespace P2PDelivery.Application.Services
             var dto = _mapper.Map<DeliveryRequestDTO>(entity);
             return RequestResponse<DeliveryRequestDTO>.Success(dto, "Deleted Successfully");
         }
-        public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams)
+        public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams, int UserID)
         {
             var requests = _requestRepository.GetAll()
                 .Include(x=>x.User)
@@ -126,9 +126,12 @@ namespace P2PDelivery.Application.Services
             {
                 requests = requests.Where(x => x.MinPrice > deliveryRequestParams.StartPrice);
             }
+            requests = requests.OrderByDescending(x => x.CreatedAt);
+            
 
             var result = _mapper.ProjectTo<DeliveryRequestDTO>(requests);
             var paginatedResult = await PageList<DeliveryRequestDTO>.CreateAsync(result, deliveryRequestParams.PageNumber, deliveryRequestParams.PageSize);
+            paginatedResult.Data.ForEach(r => r.IsOwner = r.UserId == UserID);
 
             return RequestResponse<PageList<DeliveryRequestDTO>>.Success(paginatedResult);
         }
@@ -169,7 +172,8 @@ namespace P2PDelivery.Application.Services
                 var response = _mapper.ProjectTo<ApplicationDTO>(_requestRepository.GetAll(x => x.Id == deliveryId)
                             .SelectMany(x => x.Applications.Where(a => !a.IsDeleted)))
                     .ToList();
-                    
+
+                deliveryRequestDTO.IsOwner = true;    
                 deliveryRequestDTO.ApplicationDTOs = response;
             }
 

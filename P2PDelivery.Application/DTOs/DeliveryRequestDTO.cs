@@ -20,6 +20,8 @@ public class DeliveryRequestDTO
     public string ProfileImageUrl { get; set; }
     [JsonIgnore]
     public int UserId { get; set; }
+    public bool IsOwner { get; set; } = false;
+
 
     public string? DRImageUrl { get; set; }
 

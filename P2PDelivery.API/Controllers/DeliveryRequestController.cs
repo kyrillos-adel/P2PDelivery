@@ -91,8 +91,9 @@ public class DeliveryRequestController : ControllerBase
 
     public async Task<ActionResult<RequestResponse<PageList<DeliveryRequestDTO>>>> GetAllDeliveryRequests([FromQuery] DeliveryRequestParams deliveryRequestParams, int pageNumber)
     {
+        int userId = GetUserIdFromToken();
         deliveryRequestParams.PageNumber = pageNumber;
-        var result = await _deliveryRequestService.GetAllDeliveryRequestsAsync(deliveryRequestParams);
+        var result = await _deliveryRequestService.GetAllDeliveryRequestsAsync(deliveryRequestParams, userId);
 
         if (!result.IsSuccess)
         {
