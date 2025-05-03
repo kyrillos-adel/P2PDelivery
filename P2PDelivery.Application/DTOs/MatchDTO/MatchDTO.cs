@@ -8,7 +8,10 @@ namespace P2PDelivery.Application.DTOs.MatchDTO
 {
     public class MatchDTO
     {
+
         public int ApplicationId { get; set; }
         public int DeliveryRequestId { get; set; }
+        public double Price { get; set; }
+
     }
 }

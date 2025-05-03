@@ -142,6 +142,7 @@ public class ApplicationService : IApplicationService
         {
             MatchDTO matchDTO = new MatchDTO
             {
+                Price = application.OfferedPrice,
                 ApplicationId = id,
                 DeliveryRequestId = deId
             };
