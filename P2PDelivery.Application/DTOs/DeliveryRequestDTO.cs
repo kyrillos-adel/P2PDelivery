@@ -17,9 +17,10 @@ public class DeliveryRequestDTO
     public double MaxPrice { get; set; }
     public string Status { get; set; } // e.g. Pending, Accepted, Completed, Cancelled, Delivered
     public string UserName {  get; set; }
-    public string userimageurl { get; set; }
+    public string ProfileImageUrl { get; set; }
     [JsonIgnore]
     public int UserId { get; set; }
+
     public string? DRImageUrl { get; set; }
 
 }

@@ -30,7 +30,7 @@ public class DeliveryRequestController : ControllerBase
     }
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromBody] CreateDeliveryRequestDTO dto)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestDTO>>> CreateDeliveryRequest([FromForm] CreateDeliveryRequestDTO dto)
     {
         if (!ModelState.IsValid)
         {
@@ -85,8 +85,7 @@ public class DeliveryRequestController : ControllerBase
     }
 
 
-    //Get all delivery requests in database
-
+  
 
     [HttpGet]
 
@@ -121,7 +120,7 @@ public class DeliveryRequestController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromBody] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
+    public async Task<ActionResult<RequestResponse<DeliveryRequestUpdateDto>>> Update(int id, [FromForm] DeliveryRequestUpdateDto deliveryRequestUpdateDto)
     {
         var requestResponse = await _deliveryRequestService.UpdateAsync(id, deliveryRequestUpdateDto);
         if (requestResponse.ErrorCode == ErrorCode.DeliveryRequestNotExist)
