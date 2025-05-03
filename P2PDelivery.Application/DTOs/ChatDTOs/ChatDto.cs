@@ -12,5 +12,7 @@ public class ChatDto
     
     public int UserBId { get; set; } // Foreign key
     
+    public string ChattingWith { get; set; } = string.Empty;
+    
     public ICollection<ChatMessageDto> Messages { get; set; } = new List<ChatMessageDto>();
 }

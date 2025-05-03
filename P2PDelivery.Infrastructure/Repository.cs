@@ -53,13 +53,14 @@ namespace P2PDelivery.Infrastructure
             return await _dbSet.AnyAsync(x => x.Id == id && !x.IsDeleted);
         }
 
-        public IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> expression=null)
+        public IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> expression= null)
         {
             var query = _dbSet.Where(x => !x.IsDeleted);
             if(expression!= null)
             {
                 query = query.Where(expression);
             }
+            
             return query;
         }
 
