@@ -19,9 +19,11 @@ public class DeliveryRequestDetailsDTO
     public double MinPrice { get; set; }
     public double MaxPrice { get; set; }
     public int UserId { get; set; }
+    public bool IsOwner { get; set; } = false; 
     public string UserName { get; set; }
     public string Status { get; set; }
     public string? DRImageUrl { get; set; }
+    public string? ProfileImageUrl { get; set; }
     public ICollection<ApplicationDTO>? ApplicationDTOs { get; set; } = new List<ApplicationDTO>();
 
 

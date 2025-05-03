@@ -28,6 +28,24 @@ namespace P2PDelivery.Application.Services
         public async Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto)
         {
             var entity=_mapper.Map<DeliveryRequest>(dto);
+            // Handle image saving
+            if (dto.DRImage != null && dto.DRImage.Length > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "deliveryRequest");
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{dto.DRImage.FileName}";
+                var filePath = Path.Combine(folderPath, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.DRImage.CopyToAsync(stream);
+                }
+
+                // Save relative path to entity
+                entity.DRImageUrl = $"/images/deliveryRequest/{uniqueFileName}";
+            }
             await _requestRepository.AddAsync(entity);
 
             await _requestRepository.SaveChangesAsync();
@@ -53,8 +71,7 @@ namespace P2PDelivery.Application.Services
 
         public async Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId)
         {
-            var query = _requestRepository.GetAll(x => x.UserId == userId);
-            //var query = _requestRepository.GetAll().Include(r => r.User);
+            var query = _requestRepository.GetAll(x => x.UserId == userId).Include(x=>x.User);
             var entities = await query.ToListAsync();
 
             if (entities == null || !entities.Any())
@@ -78,7 +95,7 @@ namespace P2PDelivery.Application.Services
             var dto = _mapper.Map<DeliveryRequestDTO>(entity);
             return RequestResponse<DeliveryRequestDTO>.Success(dto, "Deleted Successfully");
         }
-        public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams)
+        public async Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams, int UserID)
         {
             var requests = _requestRepository.GetAll();
             if(deliveryRequestParams.Title != null)
@@ -106,9 +123,12 @@ namespace P2PDelivery.Application.Services
             {
                 requests = requests.Where(x => x.MinPrice > deliveryRequestParams.StartPrice);
             }
+            requests = requests.OrderByDescending(x => x.CreatedAt);
+            
 
             var result = _mapper.ProjectTo<DeliveryRequestDTO>(requests);
             var paginatedResult = await PageList<DeliveryRequestDTO>.CreateAsync(result, deliveryRequestParams.PageNumber, deliveryRequestParams.PageSize);
+            paginatedResult.Data.ForEach(r => r.IsOwner = r.UserId == UserID);
 
             return RequestResponse<PageList<DeliveryRequestDTO>>.Success(paginatedResult);
         }
@@ -139,7 +159,9 @@ namespace P2PDelivery.Application.Services
                     Status = x.Status.ToString(),
                     TotalWeight = x.TotalWeight,
                     UserName=x.User.FullName,
-                    UserId = x.UserId
+                    UserId = x.UserId,
+                    DRImageUrl = x.DRImageUrl,
+                    ProfileImageUrl = x.User.ProfileImageUrl,
                 }).FirstOrDefault();
 
             if (deliveryRequestDTO.UserId == userID)
@@ -147,7 +169,8 @@ namespace P2PDelivery.Application.Services
                 var response = _mapper.ProjectTo<ApplicationDTO>(_requestRepository.GetAll(x => x.Id == deliveryId)
                             .SelectMany(x => x.Applications.Where(a => !a.IsDeleted)))
                     .ToList();
-                    
+
+                deliveryRequestDTO.IsOwner = true;    
                 deliveryRequestDTO.ApplicationDTOs = response;
             }
 
@@ -173,6 +196,42 @@ namespace P2PDelivery.Application.Services
                     "Delivery request not found");
             
             _mapper.Map(deliveryRequestUpdateDto, deliveryRequest);
+
+            if (deliveryRequestUpdateDto.DRImage != null)
+            {
+                // Delete the old image if it exists
+                if (!string.IsNullOrEmpty(deliveryRequest.DRImageUrl))
+                {
+                    var oldImagePath = Path.Combine("wwwroot", deliveryRequest.DRImageUrl.TrimStart('/'));
+
+                    if (File.Exists(oldImagePath))
+                    {
+                        File.Delete(oldImagePath);
+                    }
+                }
+
+
+
+                // Generate unique file name
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(deliveryRequestUpdateDto.DRImage.FileName);
+                var folderPath = Path.Combine("wwwroot", "images", "deliveryRequest");
+
+                // Ensure the directory exists
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await deliveryRequestUpdateDto.DRImage.CopyToAsync(stream);
+                }
+
+                // Set image URL (relative path or full URL based on your needs)
+                deliveryRequest.DRImageUrl = $"/images/deliveryRequest/{fileName}";
+            }
+
+
 
             _requestRepository.SaveChangesAsync();
             

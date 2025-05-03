@@ -12,7 +12,7 @@ namespace P2PDelivery.Application.Interfaces.Services
     {
         Task<RequestResponse<DeliveryRequestDTO>> CreateDeliveryRequestAsync(CreateDeliveryRequestDTO dto);
         Task<RequestResponse<DeliveryRequestDTO>> GetDeliveryRequestByIdAsync(int id);
-        Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams);
+        Task<RequestResponse<PageList<DeliveryRequestDTO>>> GetAllDeliveryRequestsAsync(DeliveryRequestParams deliveryRequestParams, int userID);
         Task<RequestResponse<List<DeliveryRequestDTO>>> GetDeliveryRequestsByUserIdAsync(int userId);
         Task<RequestResponse<DeliveryRequestDTO>>DeleteDeliveryRequestAsync(int id);
 
