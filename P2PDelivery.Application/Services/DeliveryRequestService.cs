@@ -235,7 +235,7 @@ namespace P2PDelivery.Application.Services
 
 
 
-            _requestRepository.SaveChangesAsync();
+            await _requestRepository.SaveChangesAsync();
             
             return RequestResponse<DeliveryRequest>.Success(deliveryRequest, "Successfully updated delivery request");
         }
@@ -249,7 +249,7 @@ namespace P2PDelivery.Application.Services
             
             _requestRepository.Delete(deliveryRequest);
 
-            _requestRepository.SaveChangesAsync();
+            await _requestRepository.SaveChangesAsync();
 
             return RequestResponse<bool>.Success(true, "Successfully deleted delivery request");
         }
@@ -262,7 +262,7 @@ namespace P2PDelivery.Application.Services
             else
             {
                 respond.Status = (DeliveryRequestStatus)statuse;
-                _requestRepository.SaveChangesAsync();
+                await _requestRepository.SaveChangesAsync();
                 return true;
             }
                
