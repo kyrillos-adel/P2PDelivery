@@ -181,7 +181,6 @@ app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 
-
 app.UseMiddleware<GlobalErrorHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.
